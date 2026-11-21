@@ -1,14 +1,14 @@
-import { calculateDefaultRoleCounts, validateRoleCounts, distributeRolesAndWords } from './roleDistributor';
-import { evaluateWinCondition, checkMrWhiteGuess } from './winEvaluator';
+import { calculateDefaultRoleCounts, validateRoleCounts } from './roleDistributor';
+import { evaluateWinCondition } from './winEvaluator';
 import { DEFAULT_WORD_PAIRS, selectRandomWordPair } from '../data/wordPairs';
-import { gameReducer, INITIAL_STATE, generateSpeechOrder } from './gameReducer';
+import { generateSpeechOrder } from './gameReducer';
 import { specialRoleHooks } from './specialRoleHooks';
-import type { Player, Role, GameConfig } from '../types/game';
+import type { Player } from '../types/game';
 
 function assert(condition: boolean, msg: string) {
   if (!condition) {
     console.error(`❌ FAILED: ${msg}`);
-    process.exit(1);
+    throw new Error(msg);
   }
   console.log(`✅ PASSED: ${msg}`);
 }
@@ -116,14 +116,13 @@ const resOngoing = evaluateWinCondition({
 });
 assert(resOngoing.winner === null, 'Game continues when conditions not met');
 
-// 4. Special Roles & Mr. White Not First Speaker in Round 1
+// 4. Special Roles & Speech Order
 console.log('\n[4. Special Roles & Speech Order]');
 const testSpeechPlayers: Player[] = [
   { id: 'p1', name: 'White', avatar: '🎭', role: 'MR_WHITE', specialRole: null, word: '', isAlive: true, score: 0 },
   { id: 'p2', name: 'Civ1', avatar: '🦎', role: 'CIVILIAN', specialRole: null, word: 'Kopi', isAlive: true, score: 0 },
   { id: 'p3', name: 'Und1', avatar: '🕵️', role: 'UNDERCOVER', specialRole: null, word: 'Teh', isAlive: true, score: 0 },
 ];
-// Test 50 times to guarantee Mr. White is never speaker #1 in Round 1
 for (let i = 0; i < 50; i++) {
   const order = generateSpeechOrder(testSpeechPlayers, 1);
   assert(order[0] !== 'p1', 'Mr. White is NOT first speaker in Round 1');
