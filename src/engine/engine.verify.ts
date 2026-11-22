@@ -250,6 +250,16 @@ assert(ranked[1].name === 'Charlie', 'Second highest (Charlie, 6pts) is rank #2'
 assert(ranked[2].name === 'Alice', 'Third highest (Alice, 2pts) is rank #3');
 console.log('✅ PASSED: Players correctly sorted by score in descending rank order!');
 
+// 9. Update Player Name By ID
+console.log('\n[9. Update Player Name By ID]');
+const updatedNameState = gameReducer(replayState, {
+  type: 'UPDATE_PLAYER_NAME_BY_ID',
+  playerId: replayState.players[0].id,
+  name: 'Spiderman',
+});
+assert(updatedNameState.players[0].name === 'Spiderman', 'Player name successfully updated via UPDATE_PLAYER_NAME_BY_ID');
+console.log('✅ PASSED: UPDATE_PLAYER_NAME_BY_ID successfully modifies target player name!');
+
 console.log('\n========================================');
 console.log('🎉 ALL ENGINE VERIFICATION CHECKS PASSED!');
 console.log('========================================\n');

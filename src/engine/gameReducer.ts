@@ -28,6 +28,7 @@ export type GameAction =
   | { type: 'SUBMIT_MR_WHITE_GUESS'; guess: string }
   | { type: 'EXECUTE_REVENGER_CHOICE'; targetId: string }
   | { type: 'UPDATE_PLAYER_NAME'; index: number; name: string }
+  | { type: 'UPDATE_PLAYER_NAME_BY_ID'; playerId: string; name: string }
   | { type: 'UPDATE_PLAYER_PROFILE'; index: number; name?: string; avatar?: string; avatarImage?: string }
   | { type: 'REROLL_WORDS' }
   | { type: 'NEXT_ROUND' }
@@ -148,6 +149,17 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (!state.players[index]) return state;
       const updatedPlayers = [...state.players];
       updatedPlayers[index] = { ...updatedPlayers[index], name };
+      return {
+        ...state,
+        players: updatedPlayers,
+      };
+    }
+
+    case 'UPDATE_PLAYER_NAME_BY_ID': {
+      const { playerId, name } = action;
+      const updatedPlayers = state.players.map(p => 
+        p.id === playerId ? { ...p, name } : p
+      );
       return {
         ...state,
         players: updatedPlayers,

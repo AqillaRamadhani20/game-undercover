@@ -17,7 +17,9 @@ import {
   Check, 
   X,
   Lock,
-  Trophy
+  Crown,
+  Sparkles,
+  Pencil
 } from 'lucide-react';
 import { InfiltratorHat } from '../common/UndercoverIcons';
 import { soundEffects, triggerHaptic } from '../../utils/audio';
@@ -34,6 +36,7 @@ interface DescriptionScreenProps {
   onOpenRulebook: () => void;
   onOpenScoreboard: () => void;
   onRerollWords: () => void;
+  onUpdatePlayerNameById?: (playerId: string, name: string) => void;
 }
 
 const CIRCLE_COLORS = [
@@ -61,10 +64,15 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
   onOpenRulebook,
   onOpenScoreboard,
   onRerollWords,
+  onUpdatePlayerNameById,
 }) => {
   // Menu Sheet State
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSubModal, setActiveSubModal] = useState<'TIMER' | 'AMNESIC' | 'PLAYERS' | 'SETTINGS' | null>(null);
+
+  // Edit Player Name State
+  const [editingPlayer, setEditingPlayer] = useState<{ id: string; name: string } | null>(null);
+  const [editingNameInput, setEditingNameInput] = useState('');
 
   // Timer State
   const [timerSeconds, setTimerSeconds] = useState(60);
@@ -273,12 +281,22 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
                   </div>
                 </div>
 
-                {/* Name Capsule Pill (Translucent Frosted Pill) */}
-                <div className="papan-glass rounded-lg px-2.5 py-1 max-w-[95px] text-center shadow-xs mt-2">
-                  <span className="text-xs font-bold text-slate-100 block truncate">
+                {/* Name Capsule Pill (Translucent Frosted Pill, Tap to Edit Name) */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEffects.playClick();
+                    setEditingPlayer({ id: player.id, name: player.name });
+                    setEditingNameInput(player.name);
+                  }}
+                  title="Ketuk untuk ubah nama"
+                  className="papan-glass rounded-lg px-2.5 py-1 max-w-[100px] text-center shadow-xs mt-2 hover:border-amber-400/60 transition-colors btn-tactile flex items-center justify-center gap-1 group cursor-pointer"
+                >
+                  <span className="text-xs font-bold text-slate-100 truncate">
                     {displayName}
                   </span>
-                </div>
+                  <Pencil className="w-2.5 h-2.5 text-slate-400 group-hover:text-amber-400 shrink-0" />
+                </button>
               </div>
             );
           })}
@@ -573,7 +591,7 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
         </div>
       )}
 
-      {/* ================= SUB-MODAL 3: DAFTAR PEMAIN & PERINGKAT ================= */}
+      {/* ================= SUB-MODAL 3: DAFTAR PEMAIN & PAPAN PERINGKAT ================= */}
       {activeSubModal === 'PLAYERS' && (() => {
         // Sort players by score descending to determine rankings
         const rankedPlayers = [...players].map(p => {
@@ -587,19 +605,21 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
         });
 
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-            <div className="papan-glass-dark rounded-3xl p-5 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+            <div className="papan-glass-dark rounded-3xl p-5 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl border border-white/10">
+              {/* Header Showcase with Crown */}
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-                    <Trophy className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500/25 to-yellow-400/20 text-amber-400 border border-amber-400/40 flex items-center justify-center shrink-0 shadow-md">
+                    <Crown className="w-6 h-6 fill-amber-400/30 text-amber-300" />
                   </div>
                   <div>
-                    <h3 className="text-base font-black text-white font-heading">
-                      Peringkat Pemain ({players.length})
+                    <h3 className="text-base font-black text-white font-heading flex items-center gap-1.5">
+                      <span>Papan Peringkat</span>
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
                     </h3>
-                    <p className="text-[11px] text-slate-400">
-                      Berdasarkan perolehan skor tertinggi
+                    <p className="text-[11px] text-slate-300">
+                      {players.length} Pemain • Skor & Prestasi
                     </p>
                   </div>
                 </div>
@@ -612,65 +632,102 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
                 </button>
               </div>
 
-              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+              {/* Player Ranking List */}
+              <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
                 {rankedPlayers.map((p, idx) => {
                   const rank = idx + 1;
                   return (
                     <div
                       key={p.id}
-                      className={`flex items-center justify-between p-3 rounded-2xl border transition-all ${
+                      className={`relative flex items-center justify-between p-3 rounded-2xl border transition-all ${
                         rank === 1
-                          ? 'papan-glass border-amber-400/50 shadow-sm'
+                          ? 'papan-glass border-amber-400/80 bg-amber-500/10 shadow-[0_4px_20px_rgba(245,158,11,0.2)]'
                           : rank === 2
-                          ? 'papan-glass border-slate-300/40'
+                          ? 'papan-glass border-slate-300/50 bg-slate-300/10 shadow-sm'
                           : rank === 3
-                          ? 'papan-glass border-amber-700/40'
+                          ? 'papan-glass border-amber-700/50 bg-amber-800/10 shadow-sm'
                           : 'papan-glass border-white/5'
                       } ${!p.isAlive ? 'opacity-65' : ''}`}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        {/* Rank Badge */}
-                        <div className="shrink-0 flex items-center justify-center">
+                      <div className="flex items-center gap-3 min-w-0">
+                        {/* Rank Badge & Crown */}
+                        <div className="shrink-0 flex items-center justify-center w-8">
                           {rank === 1 ? (
-                            <div className="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-400 text-amber-300 flex items-center justify-center font-black text-xs font-heading">
-                              #1
+                            <div className="flex flex-col items-center">
+                              <Crown className="w-5 h-5 text-amber-300 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+                              <span className="text-[10px] font-black text-amber-300 font-heading">#1</span>
                             </div>
                           ) : rank === 2 ? (
-                            <div className="w-7 h-7 rounded-full bg-slate-300/20 border border-slate-300 text-slate-200 flex items-center justify-center font-black text-xs font-heading">
-                              #2
+                            <div className="flex flex-col items-center">
+                              <Crown className="w-4 h-4 text-slate-200 fill-slate-300/60" />
+                              <span className="text-[10px] font-black text-slate-200 font-heading">#2</span>
                             </div>
                           ) : rank === 3 ? (
-                            <div className="w-7 h-7 rounded-full bg-amber-700/20 border border-amber-600 text-amber-400 flex items-center justify-center font-black text-xs font-heading">
-                              #3
+                            <div className="flex flex-col items-center">
+                              <Crown className="w-4 h-4 text-amber-600 fill-amber-700/60" />
+                              <span className="text-[10px] font-black text-amber-400 font-heading">#3</span>
                             </div>
                           ) : (
-                            <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs font-heading">
+                            <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs font-heading">
                               #{rank}
                             </div>
                           )}
                         </div>
 
-                        {/* Avatar */}
-                        {p.avatarImage ? (
-                          <img src={p.avatarImage} alt={p.name} className="w-8 h-8 rounded-full object-cover shrink-0 border border-white/10" />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-slate-700 border border-white/10 flex items-center justify-center text-xs font-bold text-white font-heading shrink-0">
-                            {(p.name.trim() || `P${rank}`).charAt(0).toUpperCase()}
+                        {/* Profile Avatar with Decorative Ring */}
+                        <div className="relative shrink-0">
+                          <div className={`w-10 h-10 rounded-full overflow-hidden bg-slate-800 flex items-center justify-center text-sm font-bold shadow-md ${
+                            rank === 1
+                              ? 'border-2 border-amber-400 ring-2 ring-amber-400/30'
+                              : rank === 2
+                              ? 'border-2 border-slate-300'
+                              : rank === 3
+                              ? 'border-2 border-amber-700'
+                              : 'border border-white/10'
+                          }`}>
+                            {p.avatarImage ? (
+                              <img src={p.avatarImage} alt={p.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className={`font-heading font-black ${
+                                rank === 1 ? 'text-amber-300' : rank === 2 ? 'text-slate-200' : rank === 3 ? 'text-amber-400' : 'text-white'
+                              }`}>
+                                {(p.name.trim() || `P${rank}`).charAt(0).toUpperCase()}
+                              </span>
+                            )}
                           </div>
-                        )}
+                          {rank === 1 && (
+                            <div className="absolute -top-1.5 -right-1 text-xs select-none">
+                              ✨
+                            </div>
+                          )}
+                        </div>
 
-                        {/* Name & Status */}
+                        {/* Name, Status & Quick Edit Pencil */}
                         <div className="min-w-0">
-                          <p className="text-xs font-bold text-white font-heading truncate">
-                            {p.name.trim() || `Pemain ${rank}`}
-                          </p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-xs font-black text-white font-heading truncate">
+                              {p.name.trim() || `Pemain ${rank}`}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                soundEffects.playClick();
+                                setEditingPlayer({ id: p.id, name: p.name });
+                                setEditingNameInput(p.name);
+                              }}
+                              title="Ubah Nama Pemain"
+                              className="p-1 rounded text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition-colors btn-tactile"
+                            >
+                              <Pencil className="w-3 h-3" />
+                            </button>
+                          </div>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             {p.isAlive ? (
-                              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300">
-                                Hidup
+                              <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                Bertahan
                               </span>
                             ) : (
-                              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300">
+                              <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
                                 Tersingkir
                               </span>
                             )}
@@ -679,11 +736,13 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
                       </div>
 
                       {/* Score on Right */}
-                      <div className="text-right shrink-0 pl-2">
-                        <span className="text-base font-black text-amber-400 font-heading">
+                      <div className="text-right shrink-0 pl-2 font-heading">
+                        <span className={`text-lg font-black ${
+                          rank === 1 ? 'text-amber-400' : rank === 2 ? 'text-slate-200' : rank === 3 ? 'text-amber-500' : 'text-slate-300'
+                        }`}>
                           {p.score}
                         </span>
-                        <span className="text-[11px] text-slate-400 ml-1 font-heading">pts</span>
+                        <span className="text-[10px] font-bold text-slate-400 ml-1">pts</span>
                       </div>
                     </div>
                   );
@@ -798,6 +857,89 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
               >
                 Kembali ke Menu Utama
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= EDIT PLAYER NAME MODAL ================= */}
+      {editingPlayer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="papan-glass-dark rounded-3xl p-6 max-w-xs w-full space-y-4 animate-scale-up shadow-2xl border border-white/10">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <Pencil className="w-4 h-4 text-amber-400" />
+                <h3 className="text-base font-black text-white font-heading">
+                  Edit Nama Pemain
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingPlayer(null)}
+                className="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center btn-tactile"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1 font-heading">
+                  Nama Baru:
+                </label>
+                <input
+                  type="text"
+                  value={editingNameInput}
+                  onChange={(e) => setEditingNameInput(e.target.value)}
+                  placeholder="Ketik nama pemain..."
+                  maxLength={16}
+                  autoFocus
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border-2 border-slate-600 focus:border-amber-400 text-white text-sm font-bold text-center focus:outline-none font-heading shadow-inner placeholder:text-slate-500"
+                />
+              </div>
+
+              {/* Quick Suggestion Chips */}
+              <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                {['Batman', 'Spiderman', 'Desta', 'Vincent', 'Raffi', 'Komeng', 'Thor'].map(chip => (
+                  <button
+                    key={chip}
+                    type="button"
+                    onClick={() => {
+                      soundEffects.playPop();
+                      setEditingNameInput(chip);
+                    }}
+                    className="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[10px] font-bold text-amber-300 btn-tactile font-heading"
+                  >
+                    {chip}
+                  </button>
+                ))}
+              </div>
+
+              {/* Save & Cancel Buttons */}
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingPlayer(null)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs btn-tactile font-heading"
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const trimmed = editingNameInput.trim();
+                    if (trimmed) {
+                      soundEffects.playPop();
+                      triggerHaptic('light');
+                      onUpdatePlayerNameById?.(editingPlayer.id, trimmed);
+                      setEditingPlayer(null);
+                    }
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs shadow-md btn-tactile font-heading"
+                >
+                  Simpan
+                </button>
+              </div>
             </div>
           </div>
         </div>

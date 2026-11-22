@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import type { Player, WinFaction, ActiveWordPair } from '../../types/game';
-import { RotateCcw, Home, Trophy } from 'lucide-react';
+import { RotateCcw, Home, Trophy, Crown } from 'lucide-react';
 import { soundEffects, triggerHaptic } from '../../utils/audio';
 
 interface GameOverScreenProps {
@@ -143,29 +143,31 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
             return (
               <div
                 key={p.id}
-                className={`p-3 rounded-2xl border flex items-center justify-between shadow-sm transition-all ${
-                  rank === 1
+                className={`p-3 rounded-2xl border flex items-center justify-between shadow-sm transition-all ${rank === 1
                     ? 'papan-glass border-amber-400/50 shadow-sm'
                     : rank === 2
-                    ? 'papan-glass border-slate-300/40'
-                    : rank === 3
-                    ? 'papan-glass border-amber-700/40'
-                    : 'papan-glass border-white/5'
-                }`}
+                      ? 'papan-glass border-slate-300/40'
+                      : rank === 3
+                        ? 'papan-glass border-amber-700/40'
+                        : 'papan-glass border-white/5'
+                  }`}
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="shrink-0 flex items-center justify-center">
+                  <div className="shrink-0 flex items-center justify-center w-7">
                     {rank === 1 ? (
-                      <div className="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-400 text-amber-300 flex items-center justify-center font-black text-[11px] font-heading">
-                        #1
+                      <div className="flex flex-col items-center">
+                        <Crown className="w-4 h-4 text-amber-300 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
+                        <span className="text-[10px] font-black text-amber-300 font-heading">#1</span>
                       </div>
                     ) : rank === 2 ? (
-                      <div className="w-6 h-6 rounded-full bg-slate-300/20 border border-slate-300 text-slate-200 flex items-center justify-center font-black text-[11px] font-heading">
-                        #2
+                      <div className="flex flex-col items-center">
+                        <Crown className="w-3.5 h-3.5 text-slate-200 fill-slate-300/60" />
+                        <span className="text-[10px] font-black text-slate-200 font-heading">#2</span>
                       </div>
                     ) : rank === 3 ? (
-                      <div className="w-6 h-6 rounded-full bg-amber-700/20 border border-amber-600 text-amber-400 flex items-center justify-center font-black text-[11px] font-heading">
-                        #3
+                      <div className="flex flex-col items-center">
+                        <Crown className="w-3.5 h-3.5 text-amber-600 fill-amber-700/60" />
+                        <span className="text-[10px] font-black text-amber-400 font-heading">#3</span>
                       </div>
                     ) : (
                       <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 text-slate-400 flex items-center justify-center font-bold text-[11px] font-heading">
@@ -195,9 +197,8 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
                 </div>
 
                 <div className="text-right font-heading">
-                  <span className={`text-xs font-black ${
-                    delta > 0 ? 'text-emerald-400' : 'text-slate-500'
-                  }`}>
+                  <span className={`text-xs font-black ${delta > 0 ? 'text-emerald-400' : 'text-slate-500'
+                    }`}>
                     {delta > 0 ? `+${delta}` : '0'} pts
                   </span>
                   <p className="text-[10px] text-slate-400 font-normal">

@@ -9,8 +9,7 @@ import {
   Check,
   RefreshCw,
   BookOpen,
-  X,
-  Edit2
+  X
 } from 'lucide-react';
 import { 
   BoyCardSilhouette, 
@@ -24,6 +23,7 @@ interface WordRevealScreenProps {
   player: Player;
   playerIndex: number;
   totalPlayers: number;
+  allPlayers?: Player[];
   isCardRevealed: boolean;
   partnerPlayer?: Player | null;
   undercoverCount: number;
@@ -35,6 +35,7 @@ interface WordRevealScreenProps {
   onReturnToLobby: () => void;
   onOpenRulebook: () => void;
   onUpdatePlayerName?: (newName: string) => void;
+  onUpdatePlayerNameById?: (playerId: string, name: string) => void;
   onUpdatePlayerProfile?: (updates: { name?: string; avatar?: string; avatarImage?: string }) => void;
   onRerollWords: () => void;
 }
@@ -43,6 +44,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
   player,
   playerIndex,
   totalPlayers,
+  allPlayers,
   isCardRevealed,
   partnerPlayer: _partnerPlayer,
   undercoverCount,
@@ -54,12 +56,12 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
   onReturnToLobby,
   onOpenRulebook,
   onUpdatePlayerName,
+  onUpdatePlayerNameById: _onUpdatePlayerNameById,
   onUpdatePlayerProfile,
   onRerollWords,
 }) => {
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isEditingName, setIsEditingName] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [playerNameInput, setPlayerNameInput] = useState(player?.name || '');
   const [selectedCardIdx, setSelectedCardIdx] = useState<number | null>(null);
@@ -77,7 +79,6 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     triggerHaptic('light');
     setSelectedCardIdx(idx);
     setPlayerNameInput(player.name);
-    setIsEditingName(false);
     setIsCardModalOpen(true);
   };
 
@@ -212,32 +213,83 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
         </div>
       </div>
 
-      {/* ================= MYSTERY CARDS GRID (Screenshot 2 Style - Solid Gold) ================= */}
+      {/* ================= MYSTERY CARDS GRID (Screenshot 2 Style - Solid Gold & Flipped Player Profile) ================= */}
       <div className="my-auto py-5">
         <div className="grid grid-cols-3 gap-3.5 max-h-[58vh] overflow-y-auto p-1">
           {Array.from({ length: cardCount }).map((_, idx) => {
             const isOpened = idx < playerIndex;
             const isGirlCard = idx % 2 === 1;
+            const openedPlayer = allPlayers?.[idx];
+
+            if (isOpened) {
+              const displayName = openedPlayer?.name?.trim() || `Pemain ${idx + 1}`;
+              const initialLetter = openedPlayer?.name?.trim() 
+                ? openedPlayer.name.trim().charAt(0).toUpperCase() 
+                : `${idx + 1}`;
+
+              return (
+                <div
+                  key={idx}
+                  onClick={() => {
+                    soundEffects.playPop();
+                    setToastMessage(`🔒 Kartu ${displayName} sudah terkunci aman!`);
+                    setTimeout(() => setToastMessage(null), 2200);
+                  }}
+                  className="relative aspect-[3/4] rounded-2xl p-2.5 flex flex-col items-center justify-between text-center papan-glass border-2 border-emerald-500/80 shadow-xl animate-flip cursor-pointer hover:border-emerald-400 transition-all btn-tactile select-none group"
+                  title="Kartu sudah dibuka"
+                >
+                  {/* Top Header: Badge Number & Check Pill */}
+                  <div className="w-full flex items-center justify-between px-0.5">
+                    <span className="text-[10px] font-black text-slate-400 font-heading">
+                      #{idx + 1}
+                    </span>
+                    <div className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    </div>
+                  </div>
+
+                  {/* Profile Avatar in Center with Glow */}
+                  <div className="relative my-auto">
+                    <div className="w-13 h-13 rounded-full overflow-hidden bg-slate-800 border-2 border-emerald-400/90 flex items-center justify-center shadow-md">
+                      {openedPlayer?.avatarImage ? (
+                        <img 
+                          src={openedPlayer.avatarImage} 
+                          alt={displayName} 
+                          className="w-full h-full object-cover" 
+                        />
+                      ) : (
+                        <span className="font-heading font-black text-base text-emerald-300">
+                          {initialLetter}
+                        </span>
+                      )}
+                    </div>
+                    {/* Tiny Check Floating Badge */}
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-xs">
+                      <Check className="w-2.5 h-2.5 stroke-[3]" />
+                    </div>
+                  </div>
+
+                  {/* Player Name at Bottom */}
+                  <div className="w-full">
+                    <p className="text-xs font-black text-white font-heading truncate px-0.5 leading-tight">
+                      {displayName}
+                    </p>
+                    <span className="text-[9px] font-extrabold text-emerald-400 tracking-tight block mt-0.5">
+                      Terkunci ✓
+                    </span>
+                  </div>
+                </div>
+              );
+            }
 
             return (
               <button
                 key={idx}
                 type="button"
                 onClick={() => handleCardClick(idx)}
-                disabled={isOpened}
-                className={`relative aspect-[3/4] rounded-2xl flex items-center justify-center btn-tactile ${
-                  isOpened
-                    ? 'bg-slate-800 border-2 border-slate-700 opacity-40 cursor-not-allowed'
-                    : 'bg-amber-500 hover:bg-amber-400 border-2 border-amber-600 shadow-md cursor-pointer'
-                }`}
+                className="relative aspect-[3/4] rounded-2xl flex items-center justify-center btn-tactile bg-amber-500 hover:bg-amber-400 border-2 border-amber-600 shadow-md cursor-pointer"
               >
-                {/* Silhouette with Question Mark */}
-                {isOpened ? (
-                  <div className="text-center">
-                    <Check className="w-8 h-8 text-slate-400 mx-auto" />
-                    <span className="text-[10px] font-bold text-slate-400">Terbuka</span>
-                  </div>
-                ) : isGirlCard ? (
+                {isGirlCard ? (
                   <GirlCardSilhouette className="w-16 h-20 text-white drop-shadow-sm" />
                 ) : (
                   <BoyCardSilhouette className="w-16 h-20 text-white drop-shadow-sm" />
@@ -399,79 +451,49 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
               </button>
             </div>
 
-            {/* STAGE 1: Privacy Guard (Direct 1-Tap Reveal, No Required Typing) */}
+            {/* STAGE 1: Privacy Guard (Screenshot 3 Style) */}
             {!isCardRevealed ? (
               <div className="space-y-4">
-                <div className="text-center space-y-1">
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    Oper HP ke:
-                  </p>
-                  
-                  {isEditingName ? (
-                    <div className="space-y-2 max-w-xs mx-auto">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={playerNameInput}
-                          onChange={(e) => setPlayerNameInput(e.target.value)}
-                          placeholder={`Pemain ${playerIndex + 1}`}
-                          maxLength={16}
-                          autoFocus
-                          className="w-full px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-600 text-white text-sm font-bold text-center focus:outline-none focus:border-cyan-400 font-heading"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const trimmed = playerNameInput.trim();
-                            onUpdatePlayerName?.(trimmed);
-                            onUpdatePlayerProfile?.({ name: trimmed });
-                            setIsEditingName(false);
-                          }}
-                          className="px-3 py-1.5 rounded-lg bg-cyan-600 text-white font-bold text-xs btn-tactile font-heading"
-                        >
-                          OK
-                        </button>
-                      </div>
-
-                      {/* Quick Famous Name Chips */}
-                      <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                        {['Batman', 'Spiderman', 'Desta', 'Vincent', 'Raffi', 'Komeng', 'Thor'].map(chip => (
-                          <button
-                            key={chip}
-                            type="button"
-                            onClick={() => {
-                              soundEffects.playPop();
-                              setPlayerNameInput(chip);
-                              onUpdatePlayerName?.(chip);
-                              onUpdatePlayerProfile?.({ name: chip });
-                              setIsEditingName(false);
-                            }}
-                            className="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[10px] font-bold text-amber-300 btn-tactile font-heading"
-                          >
-                            {chip}
-                          </button>
-                        ))}
-                      </div>
+                <div className="text-center space-y-2">
+                  <div className="space-y-1.5 max-w-xs mx-auto">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={playerNameInput}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setPlayerNameInput(val);
+                          onUpdatePlayerName?.(val);
+                          onUpdatePlayerProfile?.({ name: val });
+                        }}
+                        placeholder="Masukkan nama"
+                        maxLength={16}
+                        className="w-full px-4 py-3 rounded-2xl bg-slate-900/90 border-2 border-slate-600 focus:border-cyan-400 text-white text-base font-bold text-center focus:outline-none font-heading shadow-inner placeholder:text-slate-500"
+                      />
                     </div>
-                  ) : (
-                    <div className="flex items-center justify-center gap-1.5">
-                      <h3 className="text-2xl font-black text-white tracking-wide font-heading">
-                        {player.name ? player.name : `Pemain ${playerIndex + 1}`}
-                      </h3>
+                    <p className="text-xs text-slate-300">
+                      Masukkan nama untuk membuka kata rahasia
+                    </p>
+                  </div>
+
+                  {/* Quick Famous Name Chips */}
+                  <div className="flex items-center justify-center gap-1.5 flex-wrap pt-1">
+                    {['Batman', 'Spiderman', 'Desta', 'Vincent', 'Raffi', 'Komeng', 'Thor'].map(chip => (
                       <button
+                        key={chip}
                         type="button"
-                        onClick={() => setIsEditingName(true)}
-                        title="Ubah Nama"
-                        className="p-1 text-slate-400 hover:text-white btn-tactile"
+                        onClick={() => {
+                          soundEffects.playPop();
+                          setPlayerNameInput(chip);
+                          onUpdatePlayerName?.(chip);
+                          onUpdatePlayerProfile?.({ name: chip });
+                        }}
+                        className="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[10px] font-bold text-amber-300 btn-tactile font-heading"
                       >
-                        <Edit2 className="w-3.5 h-3.5" />
+                        {chip}
                       </button>
-                    </div>
-                  )}
-
-                  <p className="text-[11px] text-slate-400 pt-1">
-                    Pastikan hanya kamu yang melihat layar HP ini.
-                  </p>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Primary Button: Solid Blue Button (Screenshot 3) */}

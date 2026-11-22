@@ -120,12 +120,14 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                     : 'papan-glass hover:bg-slate-800/80'
                     }`}
                 >
-                  {/* Avatar / Photo Thumbnail */}
-                  <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-lg overflow-hidden shrink-0 border border-slate-600">
+                  {/* Avatar / Photo Thumbnail (Photo or Name Initial Fallback) */}
+                  <div className="w-11 h-11 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 border-2 border-slate-600 shadow-xs">
                     {p.avatarImage ? (
                       <img src={p.avatarImage} alt={p.name} className="w-full h-full object-cover" />
                     ) : (
-                      p.avatar
+                      <span className="font-heading font-black text-sm text-sky-300">
+                        {(p.name.trim() || `P${alivePlayers.indexOf(p) + 1}`).charAt(0).toUpperCase()}
+                      </span>
                     )}
                   </div>
 
@@ -165,11 +167,13 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full overflow-hidden bg-slate-700 flex items-center justify-center text-xs">
+                      <div className="w-7 h-7 rounded-full overflow-hidden bg-slate-800 border border-slate-600 flex items-center justify-center shrink-0">
                         {voter.avatarImage ? (
                           <img src={voter.avatarImage} alt={voter.name} className="w-full h-full object-cover" />
                         ) : (
-                          voter.avatar
+                          <span className="font-heading font-black text-xs text-sky-300">
+                            {(voter.name.trim() || `P${alivePlayers.indexOf(voter) + 1}`).charAt(0).toUpperCase()}
+                          </span>
                         )}
                       </div>
                       <span className="text-xs font-bold text-white font-heading">
@@ -223,9 +227,20 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                   key={p.id}
                   className="p-2 rounded-xl papan-glass-dark flex items-center justify-between"
                 >
-                  <span className="text-xs font-semibold text-white truncate font-heading">
-                    {p.name.trim() || `Pemain ${alivePlayers.indexOf(p) + 1}`}
-                  </span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-5 h-5 rounded-full overflow-hidden bg-slate-800 border border-slate-600 flex items-center justify-center shrink-0">
+                      {p.avatarImage ? (
+                        <img src={p.avatarImage} alt={p.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="font-heading font-black text-[9px] text-sky-300">
+                          {(p.name.trim() || `P${alivePlayers.indexOf(p) + 1}`).charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs font-semibold text-white truncate font-heading">
+                      {p.name.trim() || `Pemain ${alivePlayers.indexOf(p) + 1}`}
+                    </span>
+                  </div>
                   <span className="text-xs font-black text-rose-400 px-2 py-0.5 rounded-full bg-rose-500/20 font-heading">
                     {voteCounts[p.id] || 0} suara
                   </span>

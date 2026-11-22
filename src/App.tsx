@@ -61,6 +61,16 @@ export function App() {
     savePlayerProfiles(newProfiles);
   };
 
+  // Update a player's name by ID and keep profiles in sync
+  const handleUpdatePlayerNameById = (playerId: string, name: string) => {
+    dispatch({ type: 'UPDATE_PLAYER_NAME_BY_ID', playerId, name });
+    setProfiles(prev => {
+      const updated = prev.map(p => (p.id === playerId ? { ...p, name } : p));
+      savePlayerProfiles(updated);
+      return updated;
+    });
+  };
+
   // Sync personal words to localStorage
   const handleSavePersonalWords = (words: WordPair[]) => {
     setPersonalWords(words);
@@ -142,6 +152,7 @@ export function App() {
             player={state.players[state.revealIndex]}
             playerIndex={state.revealIndex}
             totalPlayers={state.players.length}
+            allPlayers={state.players}
             isCardRevealed={state.isCardRevealed}
             undercoverCount={state.config.undercoverCount}
             mrWhiteCount={state.config.mrWhiteCount}
@@ -157,6 +168,7 @@ export function App() {
             onReturnToLobby={() => dispatch({ type: 'RESET_TO_LOBBY' })}
             onOpenRulebook={() => setIsRulebookOpen(true)}
             onUpdatePlayerName={(name) => dispatch({ type: 'UPDATE_PLAYER_NAME', index: state.revealIndex, name })}
+            onUpdatePlayerNameById={handleUpdatePlayerNameById}
             onUpdatePlayerProfile={(updates) => {
               dispatch({ type: 'UPDATE_PLAYER_PROFILE', index: state.revealIndex, ...updates });
               const curPlayer = state.players[state.revealIndex];
@@ -192,6 +204,7 @@ export function App() {
             onOpenRulebook={() => setIsRulebookOpen(true)}
             onOpenScoreboard={() => setIsScoreboardOpen(true)}
             onRerollWords={() => dispatch({ type: 'REROLL_WORDS' })}
+            onUpdatePlayerNameById={handleUpdatePlayerNameById}
           />
         )}
 
