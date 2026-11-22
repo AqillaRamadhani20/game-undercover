@@ -29,7 +29,7 @@ export const RevengerChoiceModal: React.FC<RevengerChoiceModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={() => {}} title="Dendam The Revenger! ⚔️" maxWidth="max-w-md">
+    <Modal isOpen={isOpen} onClose={() => { }} title="Dendam The Revenger! ⚔️" maxWidth="max-w-md">
       <div className="space-y-4">
         <div className="p-4 rounded-2xl bg-rose-500/15 border border-rose-400/40 text-center space-y-2">
           <div className="text-4xl">{revenger.avatar}</div>
@@ -57,11 +57,10 @@ export const RevengerChoiceModal: React.FC<RevengerChoiceModalProps> = ({
                     soundEffects.playClick();
                     setSelectedTargetId(p.id);
                   }}
-                  className={`p-3 rounded-2xl border font-bold text-xs flex items-center gap-2 transition ${
-                    isSelected
-                      ? 'bg-rose-500/25 border-rose-400 text-rose-300 shadow-xs'
-                      : 'bg-slate-800 border-slate-700 text-slate-200 hover:border-rose-400/50'
-                  }`}
+                  className={`p-3 rounded-2xl border font-bold text-xs flex items-center gap-2 transition ${isSelected
+                    ? 'bg-rose-500/25 border-rose-400 text-rose-300 shadow-xs'
+                    : 'bg-slate-800 border-slate-700 text-slate-200 hover:border-rose-400/50'
+                    }`}
                 >
                   <span className="text-xl">{p.avatar}</span>
                   <span className="truncate">{p.name}</span>
