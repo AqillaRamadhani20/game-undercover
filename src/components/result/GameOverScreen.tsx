@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import type { Player, WinFaction, ActiveWordPair } from '../../types/game';
-import { RotateCcw, Home } from 'lucide-react';
+import { RotateCcw, Home, Trophy } from 'lucide-react';
 import { soundEffects, triggerHaptic } from '../../utils/audio';
 
 interface GameOverScreenProps {
@@ -36,14 +36,14 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
         angle: 60,
         spread: 55,
         origin: { x: 0 },
-        colors: ['#16A34A', '#0284C7', '#F59E0B', '#E11D48'],
+        colors: ['#10B981', '#0284C7', '#F59E0B', '#EC4899'],
       });
       confetti({
         particleCount: 3,
         angle: 120,
         spread: 55,
         origin: { x: 1 },
-        colors: ['#16A34A', '#0284C7', '#F59E0B', '#E11D48'],
+        colors: ['#10B981', '#0284C7', '#F59E0B', '#EC4899'],
       });
 
       if (Date.now() < end) {
@@ -57,26 +57,26 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
     switch (winner) {
       case 'CIVILIANS_WIN':
         return {
-          title: 'Warga Sipil Menang! 🛡️',
-          badgeColor: 'bg-chameleon-emerald/15 text-chameleon-emerald border-chameleon-emerald/30',
-          desc: 'Semua penyusup berhasil dieliminasi sebelum mereka mengambil alih kota!',
+          title: 'Warga Sipil Menang',
+          badgeColor: 'bg-emerald-950/70 text-emerald-300 border-emerald-600',
+          desc: 'Semua penyusup berhasil dieliminasi sebelum mereka mengambil alih permainan.',
         };
       case 'INFILTRATORS_WIN':
         return {
-          title: 'Penyusup Menang! 🕵️',
-          badgeColor: 'bg-chameleon-amber/15 text-chameleon-amber border-chameleon-amber/30',
-          desc: 'Undercover dan Mr. White sukses mengelabui dan menghabisi warga sipil!',
+          title: 'Penyusup Menang',
+          badgeColor: 'bg-amber-950/70 text-amber-300 border-amber-600',
+          desc: 'Undercover dan Mr. White berhasil menyusup dan mengalahkan warga sipil.',
         };
       case 'MR_WHITE_WIN':
         return {
-          title: 'Mr. White Menang Sempurna! 🎭',
-          badgeColor: 'bg-chameleon-sky/15 text-chameleon-sky border-chameleon-sky/30',
-          desc: 'Mr. White berhasil menebak kata rahasia warga sipil dengan tepat!',
+          title: 'Mr. White Menang Sempurna',
+          badgeColor: 'bg-sky-950/70 text-sky-300 border-sky-600',
+          desc: 'Mr. White berhasil menebak kata rahasia warga sipil dengan tepat.',
         };
       default:
         return {
           title: 'Permainan Selesai',
-          badgeColor: 'bg-theme-bg-card border-theme-border text-theme-text-main',
+          badgeColor: 'bg-slate-800 border-slate-700 text-white',
           desc: winReason,
         };
     }
@@ -85,93 +85,84 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
   const winnerInfo = getWinnerInfo();
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-6 space-y-6 pb-28">
+    <div className="min-h-screen undercover-solid-bg flex flex-col justify-between max-w-md mx-auto px-5 py-5 select-none relative z-10 pb-28">
       {/* Victory Banner */}
-      <div className="p-6 rounded-3xl bg-theme-bg-card border-2 border-theme-border shadow-2xl text-center space-y-3 animate-scale-up">
-        <div className="w-16 h-16 rounded-2xl bg-yellow-500/15 border border-yellow-500/30 flex items-center justify-center text-3xl mx-auto shadow-sm">
-          🏆
+      <div className="p-6 rounded-3xl bg-slate-900 border-2 border-slate-700 shadow-2xl text-center space-y-3 animate-scale-up my-3">
+        <div className="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mx-auto shadow-sm">
+          <Trophy className="w-8 h-8 stroke-[2.2]" />
         </div>
 
         <div>
-          <span className={`inline-block px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border ${winnerInfo.badgeColor}`}>
+          <span className={`inline-block px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider border font-heading ${winnerInfo.badgeColor}`}>
             {winnerInfo.title}
           </span>
-          <p className="text-xs text-theme-text-muted mt-2 max-w-sm mx-auto leading-relaxed">
+          <p className="text-xs text-slate-300 mt-2 max-w-xs mx-auto leading-relaxed">
             {winReason || winnerInfo.desc}
           </p>
         </div>
-      </div>
 
-      {/* Secret Words Revealed */}
-      {activeWordPair && (
-        <div className="p-4 rounded-2xl bg-theme-bg-card border border-theme-border space-y-3">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-theme-text-muted text-center">
-            Pasangan Kata Rahasia ({activeWordPair.category})
-          </h4>
-
-          <div className="grid grid-cols-2 gap-2 text-center">
-            <div className="p-3 rounded-xl bg-chameleon-emerald/10 border border-chameleon-emerald/20">
-              <p className="text-[11px] font-bold text-chameleon-emerald">Kata Civilian:</p>
-              <p className="text-lg font-black text-theme-text-main mt-0.5">
-                {activeWordPair.civilianWord}
-              </p>
-            </div>
-            <div className="p-3 rounded-xl bg-chameleon-amber/10 border border-chameleon-amber/20">
-              <p className="text-[11px] font-bold text-chameleon-amber">Kata Undercover:</p>
-              <p className="text-lg font-black text-theme-text-main mt-0.5">
-                {activeWordPair.undercoverWord}
-              </p>
+        {/* Word Pair Reveal */}
+        {activeWordPair && (
+          <div className="p-4 rounded-2xl bg-slate-800 border border-slate-700 text-left space-y-2 mt-2">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-heading">
+              Kata Rahasia ({activeWordPair.category}):
+            </p>
+            <div className="flex items-center justify-between text-xs">
+              <div>
+                <span className="text-slate-400">Civilian: </span>
+                <span className="font-extrabold text-white font-heading">{activeWordPair.civilianWord}</span>
+              </div>
+              <div>
+                <span className="text-slate-400">Undercover: </span>
+                <span className="font-extrabold text-amber-400 font-heading">{activeWordPair.undercoverWord}</span>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Full Players & Roles Reveal */}
-      <div className="space-y-2.5">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-theme-text-muted">
-          Ungkap Seluruh Peran & Poin Ronde Ini:
+      {/* Final Player Roster & Scores */}
+      <div className="space-y-3 my-2">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1 font-heading">
+          Peran & Skor Akhir Pemain:
         </h4>
 
-        <div className="space-y-2">
+        <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
           {players.map(p => {
             const delta = roundScoreDeltas[p.id] || 0;
             return (
               <div
                 key={p.id}
-                className="p-3 rounded-xl bg-theme-bg-card border border-theme-border flex items-center justify-between shadow-xs"
+                className="p-3 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-between shadow-sm"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{p.avatar}</span>
+                  <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-lg overflow-hidden shrink-0">
+                    {p.avatarImage ? (
+                      <img src={p.avatarImage} alt={p.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-xs font-bold text-white">{p.name.charAt(0).toUpperCase()}</span>
+                    )}
+                  </div>
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      <p className="font-bold text-sm text-theme-text-main">
-                        {p.name}
-                      </p>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                        p.role === 'CIVILIAN'
-                          ? 'bg-chameleon-emerald/15 text-chameleon-emerald'
-                          : p.role === 'UNDERCOVER'
-                          ? 'bg-chameleon-amber/15 text-chameleon-amber'
-                          : 'bg-chameleon-sky/15 text-chameleon-sky'
-                      }`}>
-                        {p.role}
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-theme-text-muted mt-0.5">
-                      {p.isAlive ? 'Bertahan Hidup' : `Gugur di Ronde ${p.eliminatedRound || 1}`}
-                      {p.specialRole && ` • ${p.specialRole}`}
+                    <p className="text-xs font-bold text-white flex items-center gap-1.5 font-heading">
+                      <span>{p.name.trim() || `Pemain ${players.indexOf(p) + 1}`}</span>
+                      {!p.isAlive && (
+                        <span className="text-[10px] text-slate-500 font-normal">(Gugur)</span>
+                      )}
+                    </p>
+                    <p className="text-[11px] text-slate-400 font-medium">
+                      {p.role === 'CIVILIAN' ? 'Civilian' : p.role === 'UNDERCOVER' ? 'Undercover' : 'Mr. White'}
                     </p>
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <span className={`text-base font-black ${
-                    delta > 0 ? 'text-chameleon-emerald' : 'text-theme-text-muted'
+                <div className="text-right font-heading">
+                  <span className={`text-xs font-black ${
+                    delta > 0 ? 'text-emerald-400' : 'text-slate-500'
                   }`}>
                     {delta > 0 ? `+${delta}` : '0'} pts
                   </span>
-                  <p className="text-[10px] text-theme-text-muted">
+                  <p className="text-[10px] text-slate-400 font-normal">
                     Total: {p.score} pts
                   </p>
                 </div>
@@ -182,15 +173,15 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
       </div>
 
       {/* Bottom Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-theme-bg/95 backdrop-blur-md border-t border-theme-border z-30">
-        <div className="max-w-xl mx-auto flex gap-2">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-900 border-t border-slate-800 z-30">
+        <div className="max-w-md mx-auto flex gap-2.5">
           <button
             type="button"
             onClick={() => {
-              soundEffects.playClick();
+              soundEffects.playPop();
               onResetToLobby();
             }}
-            className="px-4 py-3.5 rounded-2xl bg-theme-bg-card-subtle border border-theme-border font-bold text-xs text-theme-text-main hover:bg-theme-border transition flex items-center justify-center gap-1.5"
+            className="px-4 py-3.5 rounded-2xl bg-slate-800 border border-slate-700 font-bold text-xs text-slate-200 hover:bg-slate-700 flex items-center justify-center gap-1.5 btn-tactile font-heading"
           >
             <Home className="w-4 h-4" />
             <span>Lobby</span>
@@ -199,14 +190,14 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
           <button
             type="button"
             onClick={() => {
-              soundEffects.playClick();
+              soundEffects.playPop();
               triggerHaptic('medium');
               onReplayGame();
             }}
-            className="flex-1 py-3.5 px-6 rounded-2xl bg-chameleon-emerald text-white font-extrabold text-sm shadow-lg shadow-chameleon-emerald/25 hover:bg-chameleon-emerald-dark active:scale-[0.98] transition flex items-center justify-center gap-2"
+            className="flex-1 py-4 px-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-lg flex items-center justify-center gap-2 btn-tactile font-heading"
           >
             <RotateCcw className="w-4 h-4" />
-            <span>Main Lagi (Kata Baru)</span>
+            <span>Main Lagi (Langsung Buka Kartu)</span>
           </button>
         </div>
       </div>

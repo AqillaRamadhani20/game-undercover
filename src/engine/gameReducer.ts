@@ -12,7 +12,7 @@ import { evaluateWinCondition, checkMrWhiteGuess } from './winEvaluator';
 import { specialRoleHooks } from './specialRoleHooks';
 
 export type GameAction =
-  | { type: 'START_GAME'; config: GameConfig; rawPlayers: Array<{ id: string; name: string; avatar: string; score?: number }> }
+  | { type: 'START_GAME'; config: GameConfig; rawPlayers: Array<{ id: string; name: string; avatar: string; avatarImage?: string; score?: number }> }
   | { type: 'REVEAL_CURRENT_CARD' }
   | { type: 'HIDE_AND_NEXT_CARD' }
   | { type: 'NEXT_SPEAKER' }
@@ -27,6 +27,9 @@ export type GameAction =
   | { type: 'RESOLVE_TIE_BREAKER'; mode: 'REVOTE' | 'SUIT' | 'GODDESS'; chosenPlayerId?: string }
   | { type: 'SUBMIT_MR_WHITE_GUESS'; guess: string }
   | { type: 'EXECUTE_REVENGER_CHOICE'; targetId: string }
+  | { type: 'UPDATE_PLAYER_NAME'; index: number; name: string }
+  | { type: 'UPDATE_PLAYER_PROFILE'; index: number; name?: string; avatar?: string; avatarImage?: string }
+  | { type: 'REROLL_WORDS' }
   | { type: 'NEXT_ROUND' }
   | { type: 'REPLAY_GAME' }
   | { type: 'RESET_TO_LOBBY' };
@@ -35,13 +38,14 @@ export const INITIAL_CONFIG: GameConfig = {
   playerCount: 5,
   undercoverCount: 1,
   mrWhiteCount: 1,
-  enabledSpecialRoles: ['GODDESS_OF_JUSTICE', 'THE_LOVERS'],
+  enabledSpecialRoles: [],
   selectedCategories: [
     'Makanan & Minuman',
     'Benda Sehari-hari',
     'Hewan & Alam',
     'Teknologi & Pop',
     'Profesi & Transportasi',
+    'Artis & Superhero',
   ],
   discussionTimerSeconds: 60,
 };
@@ -139,6 +143,80 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case 'UPDATE_PLAYER_NAME': {
+      const { index, name } = action;
+      if (!state.players[index]) return state;
+      const updatedPlayers = [...state.players];
+      updatedPlayers[index] = { ...updatedPlayers[index], name };
+      return {
+        ...state,
+        players: updatedPlayers,
+      };
+    }
+
+    case 'UPDATE_PLAYER_PROFILE': {
+      const { index, name, avatar, avatarImage } = action;
+      if (!state.players[index]) return state;
+      const updatedPlayers = [...state.players];
+      updatedPlayers[index] = {
+        ...updatedPlayers[index],
+        name: name !== undefined ? name : updatedPlayers[index].name,
+        avatar: avatar !== undefined ? avatar : updatedPlayers[index].avatar,
+        avatarImage: avatarImage !== undefined ? avatarImage : updatedPlayers[index].avatarImage,
+      };
+      return {
+        ...state,
+        players: updatedPlayers,
+      };
+    }
+
+    case 'REROLL_WORDS': {
+      if (!state.activeWordPair) return state;
+
+      // Select new pair
+      const { pair, civilianWord, undercoverWord } = selectRandomWordPair(
+        state.config.selectedCategories,
+        state.usedWordPairIds
+      );
+
+      // Reassign word according to role
+      const updatedPlayers = state.players.map(p => {
+        let word = '';
+        if (p.role === 'CIVILIAN') {
+          word = civilianWord;
+        } else if (p.role === 'UNDERCOVER') {
+          word = undercoverWord;
+        } else if (p.role === 'MR_WHITE') {
+          word = '';
+        }
+        return {
+          ...p,
+          word,
+        };
+      });
+
+      const updatedActiveWordPair = {
+        id: pair.id,
+        civilianWord,
+        undercoverWord,
+        category: pair.category,
+      };
+
+      return {
+        ...state,
+        phase: 'WORD_REVEAL',
+        players: updatedPlayers,
+        activeWordPair: updatedActiveWordPair,
+        usedWordPairIds: [...state.usedWordPairIds, pair.id],
+        revealIndex: 0,
+        isCardRevealed: false,
+        historyLog: [
+          ...state.historyLog,
+          `Kata rahasia diacak ulang: Kategori ${pair.category}. Buka kartu dimulai kembali dari Player 1.`,
+        ],
+      };
+    }
+
     case 'REVEAL_CURRENT_CARD': {
       return {
         ...state,
@@ -150,27 +228,18 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const nextIndex = state.revealIndex + 1;
       
       if (nextIndex >= state.players.length) {
-        const speechOrderIds = generateSpeechOrder(state.players, 1);
-        const memeResult = specialRoleHooks.onRoundStart({
-          players: state.players,
-          round: 1,
-          enabledRoles: state.config.enabledSpecialRoles,
-        });
-
-        const logs = [...state.historyLog, 'Semua pemain telah melihat kata rahasia. Memulai fase deskripsi kata.'];
-        if (memeResult.logMessage) {
-          logs.push(memeResult.logMessage);
-        }
-
+        const speechOrder = generateSpeechOrder(state.players, state.round);
         return {
           ...state,
           phase: 'DESCRIPTION',
+          speechOrderIds: speechOrder,
+          currentSpeakerIndex: 0,
           revealIndex: 0,
           isCardRevealed: false,
-          speechOrderIds,
-          currentSpeakerIndex: 0,
-          memeCursePlayerId: memeResult.memeCursePlayerId,
-          historyLog: logs,
+          historyLog: [
+            ...state.historyLog,
+            'Semua pemain telah melihat kata masing-masing. Masuk ke fase Deskripsi Waktu.',
+          ],
         };
       }
 
@@ -465,32 +534,20 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 
     case 'NEXT_ROUND': {
       const nextRound = state.round + 1;
-      const speechOrderIds = generateSpeechOrder(state.players, nextRound);
-      
-      const memeResult = specialRoleHooks.onRoundStart({
-        players: state.players,
-        round: nextRound,
-        enabledRoles: state.config.enabledSpecialRoles,
-      });
-
-      const logs = [...state.historyLog, `Memulai Ronde ${nextRound}.`];
-      if (memeResult.logMessage) {
-        logs.push(memeResult.logMessage);
-      }
-
+      const speechOrder = generateSpeechOrder(state.players, nextRound);
       return {
         ...state,
         phase: 'DESCRIPTION',
         round: nextRound,
-        speechOrderIds,
+        speechOrderIds: speechOrder,
         currentSpeakerIndex: 0,
         eliminatedPlayer: null,
         chainEliminations: [],
         votes: {},
         quickCandidateId: null,
         mrWhiteGuess: '',
-        memeCursePlayerId: memeResult.memeCursePlayerId,
-        historyLog: logs,
+        roundScoreDeltas: {},
+        historyLog: [...state.historyLog, `Memulai Ronde ${nextRound}. Fase Deskripsi Waktu.`],
       };
     }
 
@@ -499,6 +556,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         id: p.id,
         name: p.name,
         avatar: p.avatar,
+        avatarImage: p.avatarImage,
         score: p.score,
       }));
 
@@ -529,7 +587,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           category: pair.category,
         },
         usedWordPairIds: [...state.usedWordPairIds, pair.id],
-        historyLog: ['Game baru dimulai!'],
+        historyLog: ['Game baru dimulai! Langsung buka kartu masing-masing tanpa perlu input ulang nama.'],
       };
     }
 

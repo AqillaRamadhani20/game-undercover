@@ -25,6 +25,7 @@ export interface Player {
   id: string;
   name: string;
   avatar: string;
+  avatarImage?: string;
   role: Role;
   specialRole: SpecialRoleType | null;
   loverPartnerId?: string | null;
@@ -99,6 +100,7 @@ export interface PlayerProfile {
   id: string;
   name: string;
   avatar: string;
+  avatarImage?: string;
   totalGames: number;
   totalWins: number;
   totalScore: number;

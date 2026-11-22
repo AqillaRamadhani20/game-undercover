@@ -31,18 +31,18 @@ export const RevengerChoiceModal: React.FC<RevengerChoiceModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={() => {}} title="Dendam The Revenger! ⚔️" maxWidth="max-w-md">
       <div className="space-y-4">
-        <div className="p-4 rounded-2xl bg-chameleon-rose/15 border border-chameleon-rose/40 text-center space-y-2">
+        <div className="p-4 rounded-2xl bg-rose-500/15 border border-rose-400/40 text-center space-y-2">
           <div className="text-4xl">{revenger.avatar}</div>
-          <h4 className="font-black text-lg text-theme-text-main">
+          <h4 className="font-black text-lg text-white">
             {revenger.name} adalah The Revenger!
           </h4>
-          <p className="text-xs text-theme-text-muted leading-relaxed">
+          <p className="text-xs text-slate-300 leading-relaxed">
             Sebelum gugur, The Revenger berhak menarik <b>1 pemain lain yang masih hidup</b> untuk ikut tereliminasi bersamanya!
           </p>
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-bold uppercase tracking-wider text-theme-text-muted">
+          <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
             Pilih Target Balas Dendam:
           </p>
 
@@ -57,10 +57,10 @@ export const RevengerChoiceModal: React.FC<RevengerChoiceModalProps> = ({
                     soundEffects.playClick();
                     setSelectedTargetId(p.id);
                   }}
-                  className={`p-3 rounded-xl border font-bold text-xs flex items-center gap-2 transition ${
+                  className={`p-3 rounded-2xl border font-bold text-xs flex items-center gap-2 transition ${
                     isSelected
-                      ? 'bg-chameleon-rose/20 border-chameleon-rose text-chameleon-rose shadow-xs'
-                      : 'bg-theme-bg-card-subtle border-theme-border text-theme-text-main hover:border-chameleon-rose/40'
+                      ? 'bg-rose-500/25 border-rose-400 text-rose-300 shadow-xs'
+                      : 'bg-slate-800 border-slate-700 text-slate-200 hover:border-rose-400/50'
                   }`}
                 >
                   <span className="text-xl">{p.avatar}</span>
@@ -75,7 +75,7 @@ export const RevengerChoiceModal: React.FC<RevengerChoiceModalProps> = ({
           type="button"
           onClick={handleConfirm}
           disabled={!selectedTargetId}
-          className="w-full py-4 rounded-2xl bg-chameleon-rose text-white font-extrabold text-sm shadow-lg shadow-chameleon-rose/25 hover:bg-chameleon-rose/90 active:scale-[0.98] transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+          className="w-full py-3.5 rounded-full bg-gradient-to-r from-rose-500 to-red-600 text-white font-black text-sm shadow-lg shadow-rose-500/25 hover:brightness-105 active:scale-95 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
         >
           <Skull className="w-4 h-4" />
           <span>Seret Pemain Ini ke Eliminasi!</span>

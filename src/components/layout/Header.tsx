@@ -1,110 +1,137 @@
 import React from 'react';
-import { Volume2, VolumeX, Moon, Sun, BookOpen, Trophy, LogOut } from 'lucide-react';
+import { Volume2, VolumeX, BookOpen, Trophy, LogOut, RefreshCw, Music } from 'lucide-react';
 import { soundEffects } from '../../utils/audio';
 import type { GamePhase } from '../../types/game';
 
 interface HeaderProps {
   phase: GamePhase;
   round: number;
-  isDark: boolean;
-  onToggleTheme: () => void;
   onOpenRulebook: () => void;
   onOpenScoreboard: () => void;
   onResetToLobby?: () => void;
+  onRerollWords?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   phase,
   round,
-  isDark,
-  onToggleTheme,
   onOpenRulebook,
   onOpenScoreboard,
   onResetToLobby,
+  onRerollWords,
 }) => {
   const [isMuted, setIsMuted] = React.useState(soundEffects.getMuted());
+  const [isBgm, setIsBgm] = React.useState(soundEffects.getBgm());
 
   const handleToggleSound = () => {
     const muted = soundEffects.toggleMute();
     setIsMuted(muted);
-    if (!muted) soundEffects.playClick();
+    if (!muted) soundEffects.playPop();
   };
 
-  const isInGame = phase !== 'LOBBY';
+  const handleToggleBgm = () => {
+    const active = soundEffects.toggleBgm();
+    setIsBgm(active);
+    soundEffects.playPop();
+  };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-theme-border bg-theme-bg/90 backdrop-blur-md transition-colors">
-      <div className="max-w-xl mx-auto px-4 h-14 flex items-center justify-between">
-        {/* Brand & Status */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-chameleon-emerald/15 border border-chameleon-emerald/30 flex items-center justify-center text-lg select-none">
-            🦎
+    <header className="sticky top-0 z-40 w-full border-b border-slate-800 bg-slate-900 shadow-sm">
+      <div className="max-w-md mx-auto px-4 h-13 flex items-center justify-between">
+        {/* Brand & Round Status */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-black text-sky-400 select-none font-heading">
+            UC
           </div>
           <div>
-            <h1 className="font-extrabold text-sm tracking-tight text-theme-text-main flex items-center gap-1.5">
+            <h1 className="font-black text-sm tracking-tight text-white flex items-center gap-1.5 font-heading">
               <span>Undercover</span>
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-chameleon-emerald/20 text-chameleon-emerald font-bold tracking-normal uppercase">
-                Offline 1 HP
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-sky-600/30 text-sky-300 font-extrabold uppercase">
+                Ronde {round}
               </span>
             </h1>
-            {isInGame && (
-              <p className="text-[11px] font-semibold text-chameleon-sky">
-                Ronde {round} • {getPhaseLabel(phase)}
-              </p>
-            )}
+            <p className="text-[11px] font-semibold text-slate-400">
+              {getPhaseLabel(phase)}
+            </p>
           </div>
         </div>
 
         {/* Action Controls */}
         <div className="flex items-center gap-1">
-          {/* Sound Mute Toggle */}
+          {/* Lo-fi BGM toggle */}
           <button
-            onClick={handleToggleSound}
-            aria-label={isMuted ? 'Aktifkan Suara' : 'Matikan Suara'}
-            className="p-2 rounded-xl text-theme-text-muted hover:text-theme-text-main hover:bg-theme-bg-card-subtle transition"
+            type="button"
+            onClick={handleToggleBgm}
+            title={isBgm ? 'Matikan BGM' : 'Putar Musik Latar Lofi'}
+            aria-label="Toggle BGM"
+            className={`p-2 rounded-xl transition btn-tactile ${
+              isBgm ? 'text-emerald-400 bg-emerald-500/10' : 'text-slate-400 hover:text-white'
+            }`}
           >
-            {isMuted ? <VolumeX className="w-4 h-4 text-chameleon-rose" /> : <Volume2 className="w-4 h-4" />}
+            <Music className="w-4 h-4" />
           </button>
 
-          {/* Theme Dark/Light Toggle */}
+          {/* Sound Mute Toggle */}
           <button
-            onClick={onToggleTheme}
-            aria-label="Ubah Tema"
-            className="p-2 rounded-xl text-theme-text-muted hover:text-theme-text-main hover:bg-theme-bg-card-subtle transition"
+            type="button"
+            onClick={handleToggleSound}
+            aria-label={isMuted ? 'Aktifkan Suara' : 'Matikan Suara'}
+            className="p-2 rounded-xl text-slate-400 hover:text-white btn-tactile"
           >
-            {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
+            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-slate-200" />}
           </button>
 
           {/* Scoreboard */}
           <button
+            type="button"
             onClick={onOpenScoreboard}
             aria-label="Papan Skor"
-            className="p-2 rounded-xl text-theme-text-muted hover:text-theme-text-main hover:bg-theme-bg-card-subtle transition"
+            className="p-2 rounded-xl text-slate-400 hover:text-white btn-tactile"
           >
-            <Trophy className="w-4 h-4 text-yellow-500" />
+            <Trophy className="w-4 h-4 text-amber-400" />
           </button>
 
           {/* Rulebook */}
           <button
+            type="button"
             onClick={onOpenRulebook}
             aria-label="Panduan Bermain"
-            className="p-2 rounded-xl text-theme-text-muted hover:text-theme-text-main hover:bg-theme-bg-card-subtle transition"
+            className="p-2 rounded-xl text-slate-400 hover:text-white btn-tactile"
           >
-            <BookOpen className="w-4 h-4 text-chameleon-sky" />
+            <BookOpen className="w-4 h-4 text-sky-400" />
           </button>
 
-          {/* End Game / Lobby Exit if in game */}
-          {isInGame && onResetToLobby && (
+          {/* Reroll Words */}
+          {onRerollWords && (phase === 'VOTING' || phase === 'DESCRIPTION') && (
             <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Acak ulang kata rahasia baru? Pembagian kartu akan diulang dari pemain 1.')) {
+                  soundEffects.playCardFlip();
+                  onRerollWords();
+                }
+              }}
+              title="Pilih Ulang Kata"
+              aria-label="Pilih Ulang Kata"
+              className="p-2 rounded-xl text-amber-400 hover:text-amber-300 btn-tactile"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* End Game / Lobby Exit */}
+          {onResetToLobby && (
+            <button
+              type="button"
               onClick={() => {
                 if (window.confirm('Yakin ingin kembali ke Lobby dan mengakhiri permainan ini?')) {
-                  soundEffects.playClick();
+                  soundEffects.playPop();
                   onResetToLobby();
                 }
               }}
               title="Kembali ke Lobby"
               aria-label="Kembali ke Lobby"
-              className="p-2 ml-1 rounded-xl text-chameleon-rose hover:bg-chameleon-rose/10 transition"
+              className="p-2 ml-0.5 rounded-xl text-rose-400 hover:bg-rose-500/20 btn-tactile"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -120,12 +147,12 @@ function getPhaseLabel(phase: GamePhase): string {
     case 'WORD_REVEAL': return 'Bagi Kata';
     case 'DESCRIPTION': return 'Giliran Bicara';
     case 'DISCUSSION': return 'Diskusi';
-    case 'VOTING': return 'Voting';
-    case 'TIE_BREAKER': return 'Seri';
+    case 'VOTING': return 'Voting Eliminasi';
+    case 'TIE_BREAKER': return 'Voting Seri';
     case 'MR_WHITE_GUESS': return 'Tebakan Mr. White';
     case 'REVENGER_REVENGE': return 'Balas Dendam';
-    case 'ROUND_RESULT': return 'Hasil';
-    case 'GAME_OVER': return 'Selesai';
+    case 'ROUND_RESULT': return 'Hasil Ronde';
+    case 'GAME_OVER': return 'Permainan Selesai';
     default: return '';
   }
 }

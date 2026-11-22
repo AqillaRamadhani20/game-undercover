@@ -34,6 +34,10 @@ export const PersonalWordsModal: React.FC<PersonalWordsModalProps> = ({
       setError('Kata A dan Kata B tidak boleh persis sama!');
       return;
     }
+    if (wordA.trim().includes(' ') || wordB.trim().includes(' ')) {
+      setError('Gunakan 1 kata saja untuk masing-masing kata (tanpa spasi)!');
+      return;
+    }
 
     const newPair: WordPair = {
       id: `custom-${Date.now()}`,
@@ -61,41 +65,41 @@ export const PersonalWordsModal: React.FC<PersonalWordsModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title="Kelola Kata Kustom (Personal Words)" maxWidth="max-w-md">
       <div className="space-y-5">
         {/* Form */}
-        <form onSubmit={handleAddWord} className="p-4 rounded-xl bg-theme-bg-card-subtle border border-theme-border space-y-3">
-          <p className="text-xs font-bold uppercase tracking-wider text-theme-text-muted">
+        <form onSubmit={handleAddWord} className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/80 space-y-3 shadow-inner">
+          <p className="text-xs font-bold uppercase tracking-wider text-emerald-400">
             Tambah Pasangan Kata Baru
           </p>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-medium text-theme-text-muted">Kata 1 (Warga/Penyusup)</label>
+              <label className="text-xs font-medium text-slate-300">Kata 1 (Warga/Penyusup)</label>
               <input
                 type="text"
                 placeholder="mis. Boba"
                 value={wordA}
                 onChange={(e) => setWordA(e.target.value)}
-                className="w-full mt-1 px-3 py-2 text-sm rounded-lg bg-theme-bg border border-theme-border text-theme-text-main focus:outline-none focus:border-chameleon-emerald"
+                className="w-full mt-1 px-3 py-2 text-sm rounded-lg bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 transition"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-theme-text-muted">Kata 2 (Mirip tapi beda)</label>
+              <label className="text-xs font-medium text-slate-300">Kata 2 (Mirip tapi beda)</label>
               <input
                 type="text"
                 placeholder="mis. Cendol"
                 value={wordB}
                 onChange={(e) => setWordB(e.target.value)}
-                className="w-full mt-1 px-3 py-2 text-sm rounded-lg bg-theme-bg border border-theme-border text-theme-text-main focus:outline-none focus:border-chameleon-emerald"
+                className="w-full mt-1 px-3 py-2 text-sm rounded-lg bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 transition"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-medium text-theme-text-muted">Kategori</label>
+              <label className="text-xs font-medium text-slate-300">Kategori</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full mt-1 px-3 py-2 text-sm rounded-lg bg-theme-bg border border-theme-border text-theme-text-main focus:outline-none focus:border-chameleon-emerald"
+                className="w-full mt-1 px-3 py-2 text-sm rounded-lg bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-emerald-400 transition"
               >
                 {CATEGORIES.map(cat => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -104,22 +108,22 @@ export const PersonalWordsModal: React.FC<PersonalWordsModalProps> = ({
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-theme-text-muted">Petunjuk / Hint (Opsional)</label>
+              <label className="text-xs font-medium text-slate-300">Petunjuk / Hint (Opsional)</label>
               <input
                 type="text"
                 placeholder="mis. Minuman manis"
                 value={hint}
                 onChange={(e) => setHint(e.target.value)}
-                className="w-full mt-1 px-3 py-2 text-sm rounded-lg bg-theme-bg border border-theme-border text-theme-text-main focus:outline-none focus:border-chameleon-emerald"
+                className="w-full mt-1 px-3 py-2 text-sm rounded-lg bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-400 transition"
               />
             </div>
           </div>
 
-          {error && <p className="text-xs text-chameleon-rose font-medium">{error}</p>}
+          {error && <p className="text-xs text-rose-400 font-medium">{error}</p>}
 
           <button
             type="submit"
-            className="w-full py-2.5 px-4 rounded-xl bg-chameleon-emerald text-white font-semibold text-sm hover:bg-chameleon-emerald-dark transition flex items-center justify-center gap-2"
+            className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition flex items-center justify-center gap-2 shadow-md btn-tactile"
           >
             <Plus className="w-4 h-4" /> Simpan Pasangan Kata
           </button>
@@ -128,13 +132,13 @@ export const PersonalWordsModal: React.FC<PersonalWordsModalProps> = ({
         {/* Existing custom words */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-theme-text-muted">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
               Daftar Kata Kustom ({personalWords.length})
             </h4>
           </div>
 
           {personalWords.length === 0 ? (
-            <div className="text-center py-6 border border-dashed border-theme-border rounded-xl text-theme-text-muted text-xs">
+            <div className="text-center py-6 border border-dashed border-slate-700 rounded-2xl text-slate-400 text-xs">
               Belum ada kata kustom. Buat kata rahasiamu sendiri di form atas!
             </div>
           ) : (
@@ -142,19 +146,19 @@ export const PersonalWordsModal: React.FC<PersonalWordsModalProps> = ({
               {personalWords.map(word => (
                 <div
                   key={word.id}
-                  className="p-2.5 rounded-lg bg-theme-bg-card-subtle border border-theme-border flex items-center justify-between"
+                  className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-between hover:border-slate-600 transition"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-theme-text-main">
-                      {word.wordA} <span className="text-chameleon-sky font-normal">vs</span> {word.wordB}
+                    <p className="text-sm font-semibold text-white">
+                      {word.wordA} <span className="text-cyan-400 font-normal">vs</span> {word.wordB}
                     </p>
-                    <p className="text-xs text-theme-text-muted">
+                    <p className="text-xs text-slate-400">
                       {word.category} {word.hint ? `• ${word.hint}` : ''}
                     </p>
                   </div>
                   <button
                     onClick={() => handleDeleteWord(word.id)}
-                    className="p-1.5 text-chameleon-rose hover:bg-chameleon-rose/10 rounded-lg transition"
+                    className="p-1.5 text-rose-400 hover:bg-rose-500/10 rounded-lg transition"
                     title="Hapus kata"
                   >
                     <Trash2 className="w-4 h-4" />

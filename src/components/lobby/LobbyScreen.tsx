@@ -1,24 +1,21 @@
 import React, { useState } from 'react';
 import { 
   Users, 
-  UserPlus, 
-  Trash2, 
-  Shield, 
-  Sparkles, 
-  BookOpen, 
-  Clock, 
-  Play, 
-  Wand2, 
+  Settings, 
   Plus, 
-  Minus,
-  Check,
-  AlertCircle
+  Minus, 
+  ArrowLeft,
+  AlertCircle,
+  Music
 } from 'lucide-react';
-import type { GameConfig, PlayerProfile, SpecialRoleType } from '../../types/game';
-import { CATEGORIES, getAllWordPairs } from '../../data/wordPairs';
+import type { GameConfig, PlayerProfile } from '../../types/game';
+import { getAllWordPairs } from '../../data/wordPairs';
 import { calculateDefaultRoleCounts, validateRoleCounts } from '../../engine/roleDistributor';
+import { SliderBoyThumb } from '../common/UndercoverIcons';
 import { DEFAULT_AVATARS } from '../../utils/storage';
 import { soundEffects, triggerHaptic } from '../../utils/audio';
+import { GroupPlayersModal } from './GroupPlayersModal';
+import { CategoriesModal } from './CategoriesModal';
 
 interface LobbyScreenProps {
   profiles: PlayerProfile[];
@@ -27,6 +24,8 @@ interface LobbyScreenProps {
   onUpdateConfig: (config: GameConfig) => void;
   onStartGame: () => void;
   onOpenPersonalWords: () => void;
+  onOpenRulebook: () => void;
+  onOpenScoreboard: () => void;
 }
 
 export const LobbyScreen: React.FC<LobbyScreenProps> = ({
@@ -36,94 +35,62 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
   onUpdateConfig,
   onStartGame,
   onOpenPersonalWords,
+  onOpenRulebook,
+  onOpenScoreboard,
 }) => {
-  const [newPlayerName, setNewPlayerName] = useState('');
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
+  const [isBgmActive, setIsBgmActive] = useState(soundEffects.getBgm());
 
   const playerCount = profiles.length;
   const civilianCount = playerCount - config.undercoverCount - config.mrWhiteCount;
   const validation = validateRoleCounts(playerCount, config.undercoverCount, config.mrWhiteCount);
+  const allPairs = getAllWordPairs();
 
-  // Auto calculate defaults
-  const handleAutoRoles = () => {
-    soundEffects.playClick();
+  const handleToggleBgm = () => {
+    soundEffects.playPop();
+    const active = soundEffects.toggleBgm();
+    setIsBgmActive(active);
+  };
+
+  // Handle slider change (3 to 20 players)
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const targetCount = parseInt(e.target.value, 10);
+    if (isNaN(targetCount) || targetCount === playerCount) return;
+
+    soundEffects.playPop();
     triggerHaptic('light');
-    const auto = calculateDefaultRoleCounts(playerCount);
+
+    let updatedProfiles = [...profiles];
+    if (targetCount > profiles.length) {
+      for (let i = profiles.length + 1; i <= targetCount; i++) {
+        updatedProfiles.push({
+          id: `p-${Date.now()}-${i}`,
+          name: '',
+          avatar: DEFAULT_AVATARS[(i - 1) % DEFAULT_AVATARS.length] || '🦎',
+          totalGames: 0,
+          totalWins: 0,
+          totalScore: 0,
+        });
+      }
+    } else if (targetCount < profiles.length) {
+      updatedProfiles = updatedProfiles.slice(0, targetCount);
+    }
+
+    onUpdateProfiles(updatedProfiles);
+
+    const auto = calculateDefaultRoleCounts(targetCount);
     onUpdateConfig({
       ...config,
+      playerCount: targetCount,
       undercoverCount: auto.undercoverCount,
       mrWhiteCount: auto.mrWhiteCount,
     });
   };
 
-  const handleAddPlayer = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (playerCount >= 20) return;
-    const name = newPlayerName.trim() || `Pemain ${playerCount + 1}`;
-    const nextAvatar = DEFAULT_AVATARS[playerCount % DEFAULT_AVATARS.length];
-    
-    const newProfile: PlayerProfile = {
-      id: `p-${Date.now()}`,
-      name,
-      avatar: nextAvatar,
-      totalGames: 0,
-      totalWins: 0,
-      totalScore: 0,
-    };
-
-    soundEffects.playClick();
-    triggerHaptic('light');
-    const newProfiles = [...profiles, newProfile];
-    onUpdateProfiles(newProfiles);
-    setNewPlayerName('');
-
-    const auto = calculateDefaultRoleCounts(newProfiles.length);
-    onUpdateConfig({
-      ...config,
-      playerCount: newProfiles.length,
-      undercoverCount: auto.undercoverCount,
-      mrWhiteCount: auto.mrWhiteCount,
-    });
-  };
-
-  const handleRemovePlayer = (id: string) => {
-    if (playerCount <= 3) return;
-    soundEffects.playClick();
-    triggerHaptic('light');
-    const newProfiles = profiles.filter(p => p.id !== id);
-    onUpdateProfiles(newProfiles);
-
-    const auto = calculateDefaultRoleCounts(newProfiles.length);
-    onUpdateConfig({
-      ...config,
-      playerCount: newProfiles.length,
-      undercoverCount: Math.min(config.undercoverCount, auto.undercoverCount),
-      mrWhiteCount: Math.min(config.mrWhiteCount, auto.mrWhiteCount),
-    });
-  };
-
-  const handleCycleAvatar = (index: number) => {
-    soundEffects.playClick();
-    const currentAvatar = profiles[index].avatar;
-    const currentAvatarIdx = DEFAULT_AVATARS.indexOf(currentAvatar);
-    const nextAvatar = DEFAULT_AVATARS[(currentAvatarIdx + 1) % DEFAULT_AVATARS.length];
-    
-    const updated = [...profiles];
-    updated[index] = { ...updated[index], avatar: nextAvatar };
-    onUpdateProfiles(updated);
-  };
-
-  const handleToggleSpecialRole = (role: SpecialRoleType) => {
-    soundEffects.playClick();
-    triggerHaptic('light');
-    const exists = config.enabledSpecialRoles.includes(role);
-    const updated = exists
-      ? config.enabledSpecialRoles.filter(r => r !== role)
-      : [...config.enabledSpecialRoles, role];
-    onUpdateConfig({ ...config, enabledSpecialRoles: updated });
-  };
 
   const handleToggleCategory = (cat: string) => {
-    soundEffects.playClick();
+    soundEffects.playPop();
     const exists = config.selectedCategories.includes(cat);
     let updated: string[];
     if (exists) {
@@ -135,407 +102,282 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     onUpdateConfig({ ...config, selectedCategories: updated });
   };
 
-  const allPairs = getAllWordPairs();
+  const sliderMin = 3;
+  const sliderMax = 20;
+  const sliderPercent = Math.min(100, Math.max(0, ((playerCount - sliderMin) / (sliderMax - sliderMin)) * 100));
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-5 space-y-6 pb-28">
-      {/* Hero Banner */}
-      <div className="p-4 rounded-2xl bg-gradient-to-br from-chameleon-emerald/15 to-chameleon-sky/15 border border-chameleon-emerald/30 shadow-sm text-center">
-        <h2 className="text-xl font-extrabold text-theme-text-main flex items-center justify-center gap-2">
-          <span>Pass & Play</span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-chameleon-emerald text-white font-semibold">
-            1 HP Bersama
-          </span>
-        </h2>
-        <p className="text-xs text-theme-text-muted mt-1">
-          Oper satu HP bergantian. Temukan siapa Undercover & Mr. White di antara kalian!
-        </p>
-      </div>
+    <div className="min-h-screen undercover-solid-bg flex flex-col justify-between max-w-md mx-auto px-5 py-6 select-none relative z-10">
+      {/* ================= TOP NAVIGATION BAR ================= */}
+      <div className="flex items-center justify-between">
+        {/* Back Button */}
+        <button
+          type="button"
+          onClick={() => {
+            soundEffects.playPop();
+            const auto = calculateDefaultRoleCounts(5);
+            onUpdateConfig({
+              ...config,
+              undercoverCount: auto.undercoverCount,
+              mrWhiteCount: auto.mrWhiteCount,
+            });
+          }}
+          aria-label="Kembali"
+          className="w-11 h-11 rounded-full bg-sky-600 hover:bg-sky-500 text-white flex items-center justify-center shadow-md border border-sky-400/40 btn-tactile"
+        >
+          <ArrowLeft className="w-6 h-6 stroke-[2.5]" />
+        </button>
 
-      {/* Player Section */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold text-sm uppercase tracking-wider text-theme-text-muted flex items-center gap-1.5">
-            <Users className="w-4 h-4 text-chameleon-emerald" /> Daftar Pemain ({playerCount}/20)
-          </h3>
-          <span className="text-xs text-theme-text-muted font-medium">
-            Min. 3 Pemain
-          </span>
-        </div>
-
-        {/* Players List Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto pr-1">
-          {profiles.map((player, idx) => (
-            <div
-              key={player.id}
-              className="flex items-center justify-between p-2.5 rounded-xl bg-theme-bg-card border border-theme-border shadow-xs hover:border-chameleon-emerald/50 transition-all"
-            >
-              <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                <button
-                  type="button"
-                  onClick={() => handleCycleAvatar(idx)}
-                  className="w-10 h-10 rounded-xl bg-theme-bg-card-subtle flex items-center justify-center text-xl shrink-0 hover:scale-105 active:scale-95 transition"
-                  title="Klik untuk ganti emoji"
-                >
-                  {player.avatar}
-                </button>
-                <div className="min-w-0 flex-1">
-                  <input
-                    type="text"
-                    value={player.name}
-                    onChange={(e) => {
-                      const updated = [...profiles];
-                      updated[idx] = { ...updated[idx], name: e.target.value };
-                      onUpdateProfiles(updated);
-                    }}
-                    maxLength={16}
-                    className="w-full text-sm font-semibold bg-transparent text-theme-text-main focus:outline-none focus:border-b focus:border-chameleon-emerald"
-                  />
-                  <p className="text-[11px] text-theme-text-muted">
-                    Skor: {player.totalScore} pts
-                  </p>
-                </div>
-              </div>
-
-              {playerCount > 3 && (
-                <button
-                  onClick={() => handleRemovePlayer(player.id)}
-                  aria-label="Hapus Pemain"
-                  className="p-2 text-theme-text-muted hover:text-chameleon-rose hover:bg-chameleon-rose/10 rounded-lg transition"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Add Player Input */}
-        {playerCount < 20 && (
-          <form onSubmit={handleAddPlayer} className="flex gap-2">
-            <input
-              type="text"
-              placeholder={`Nama pemain ${playerCount + 1}...`}
-              value={newPlayerName}
-              onChange={(e) => setNewPlayerName(e.target.value)}
-              maxLength={16}
-              className="flex-1 px-3.5 py-2.5 rounded-xl bg-theme-bg-card border border-theme-border text-sm text-theme-text-main focus:outline-none focus:border-chameleon-emerald"
-            />
+        {/* Center / Right Controls: BGM & Group */}
+        <div className="flex items-center gap-3">
+          {/* Lo-fi BGM Ambience Button */}
+          <div className="flex flex-col items-center">
             <button
-              type="submit"
-              className="px-4 py-2.5 rounded-xl bg-chameleon-emerald/15 border border-chameleon-emerald/30 text-chameleon-emerald font-semibold text-sm hover:bg-chameleon-emerald hover:text-white transition flex items-center gap-1.5 shrink-0"
-            >
-              <UserPlus className="w-4 h-4" /> Tambah
-            </button>
-          </form>
-        )}
-      </div>
-
-      {/* Role Composition */}
-      <div className="space-y-3 p-4 rounded-2xl bg-theme-bg-card border border-theme-border">
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold text-sm text-theme-text-main flex items-center gap-1.5">
-            <Shield className="w-4 h-4 text-chameleon-sky" /> Komposisi Peran
-          </h3>
-          <button
-            type="button"
-            onClick={handleAutoRoles}
-            className="text-xs text-chameleon-sky hover:underline font-semibold flex items-center gap-1"
-          >
-            <Wand2 className="w-3.5 h-3.5" /> Rasio Otomatis
-          </button>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2 text-center">
-          {/* Civilians */}
-          <div className="p-3 rounded-xl bg-chameleon-emerald/10 border border-chameleon-emerald/20">
-            <span className="text-xl">🛡️</span>
-            <p className="text-xs font-bold text-chameleon-emerald mt-1">Civilian</p>
-            <p className="text-2xl font-black text-theme-text-main mt-0.5">{civilianCount}</p>
-            <p className="text-[10px] text-theme-text-muted">Mayoritas</p>
-          </div>
-
-          {/* Undercover */}
-          <div className="p-3 rounded-xl bg-chameleon-amber/10 border border-chameleon-amber/20">
-            <span className="text-xl">🕵️</span>
-            <p className="text-xs font-bold text-chameleon-amber mt-1">Undercover</p>
-            <div className="flex items-center justify-center gap-1 mt-0.5">
-              <button
-                type="button"
-                onClick={() => {
-                  if (config.undercoverCount > 1) {
-                    soundEffects.playClick();
-                    onUpdateConfig({ ...config, undercoverCount: config.undercoverCount - 1 });
-                  }
-                }}
-                disabled={config.undercoverCount <= 1}
-                className="w-6 h-6 rounded-md bg-theme-bg-card-subtle flex items-center justify-center text-xs disabled:opacity-30"
-              >
-                <Minus className="w-3 h-3" />
-              </button>
-              <span className="text-2xl font-black text-theme-text-main px-1">
-                {config.undercoverCount}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  if (civilianCount > 2) {
-                    soundEffects.playClick();
-                    onUpdateConfig({ ...config, undercoverCount: config.undercoverCount + 1 });
-                  }
-                }}
-                disabled={civilianCount <= 2}
-                className="w-6 h-6 rounded-md bg-theme-bg-card-subtle flex items-center justify-center text-xs disabled:opacity-30"
-              >
-                <Plus className="w-3 h-3" />
-              </button>
-            </div>
-            <p className="text-[10px] text-theme-text-muted">Kata Mirip</p>
-          </div>
-
-          {/* Mr. White */}
-          <div className="p-3 rounded-xl bg-chameleon-sky/10 border border-chameleon-sky/20">
-            <span className="text-xl">🎭</span>
-            <p className="text-xs font-bold text-chameleon-sky mt-1">Mr. White</p>
-            <div className="flex items-center justify-center gap-1 mt-0.5">
-              <button
-                type="button"
-                onClick={() => {
-                  if (config.mrWhiteCount > 0) {
-                    soundEffects.playClick();
-                    onUpdateConfig({ ...config, mrWhiteCount: config.mrWhiteCount - 1 });
-                  }
-                }}
-                disabled={config.mrWhiteCount <= 0}
-                className="w-6 h-6 rounded-md bg-theme-bg-card-subtle flex items-center justify-center text-xs disabled:opacity-30"
-              >
-                <Minus className="w-3 h-3" />
-              </button>
-              <span className="text-2xl font-black text-theme-text-main px-1">
-                {config.mrWhiteCount}
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  if (civilianCount > 2) {
-                    soundEffects.playClick();
-                    onUpdateConfig({ ...config, mrWhiteCount: config.mrWhiteCount + 1 });
-                  }
-                }}
-                disabled={civilianCount <= 2}
-                className="w-6 h-6 rounded-md bg-theme-bg-card-subtle flex items-center justify-center text-xs disabled:opacity-30"
-              >
-                <Plus className="w-3 h-3" />
-              </button>
-            </div>
-            <p className="text-[10px] text-theme-text-muted">Tanpa Kata</p>
-          </div>
-        </div>
-
-        {!validation.valid && (
-          <div className="flex items-center gap-2 p-2.5 rounded-xl bg-chameleon-rose/10 border border-chameleon-rose/30 text-chameleon-rose text-xs font-medium">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{validation.reason}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Special Roles Expansion */}
-      <div className="space-y-3 p-4 rounded-2xl bg-theme-bg-card border border-theme-border">
-        <h3 className="font-bold text-sm text-theme-text-main flex items-center gap-1.5">
-          <Sparkles className="w-4 h-4 text-chameleon-purple" /> Peran Spesial (Modular Hooks)
-        </h3>
-        
-        <div className="space-y-2">
-          {/* Goddess of Justice */}
-          <label className="flex items-center justify-between p-2.5 rounded-xl bg-theme-bg-card-subtle border border-theme-border cursor-pointer select-none">
-            <div className="flex items-center gap-2.5">
-              <span className="text-xl">⚖️</span>
-              <div>
-                <p className="font-bold text-xs text-theme-text-main">Goddess of Justice</p>
-                <p className="text-[11px] text-theme-text-muted">Memutus suara seri jika voting imbang</p>
-              </div>
-            </div>
-            <input
-              type="checkbox"
-              checked={config.enabledSpecialRoles.includes('GODDESS_OF_JUSTICE')}
-              onChange={() => handleToggleSpecialRole('GODDESS_OF_JUSTICE')}
-              className="w-5 h-5 accent-chameleon-emerald rounded cursor-pointer"
-            />
-          </label>
-
-          {/* The Lovers */}
-          <label className={`flex items-center justify-between p-2.5 rounded-xl border select-none ${
-            playerCount < 5 
-              ? 'opacity-40 bg-theme-bg-card-subtle/50 border-theme-border cursor-not-allowed'
-              : 'bg-theme-bg-card-subtle border-theme-border cursor-pointer'
-          }`}>
-            <div className="flex items-center gap-2.5">
-              <span className="text-xl">💖</span>
-              <div>
-                <p className="font-bold text-xs text-theme-text-main">
-                  The Lovers {playerCount < 5 && <span className="text-[10px] text-chameleon-rose font-normal">(Min. 5 pemain)</span>}
-                </p>
-                <p className="text-[11px] text-theme-text-muted">2 pemain saling terikat; satu gugur, pasangannya ikut gugur</p>
-              </div>
-            </div>
-            <input
-              type="checkbox"
-              disabled={playerCount < 5}
-              checked={config.enabledSpecialRoles.includes('THE_LOVERS')}
-              onChange={() => handleToggleSpecialRole('THE_LOVERS')}
-              className="w-5 h-5 accent-chameleon-emerald rounded cursor-pointer"
-            />
-          </label>
-
-          {/* Mr. Meme */}
-          <label className="flex items-center justify-between p-2.5 rounded-xl bg-theme-bg-card-subtle border border-theme-border cursor-pointer select-none">
-            <div className="flex items-center gap-2.5">
-              <span className="text-xl">🤫</span>
-              <div>
-                <p className="font-bold text-xs text-theme-text-main">Mr. Meme</p>
-                <p className="text-[11px] text-theme-text-muted">Tiap ronde 1 pemain acak wajib deskripsi dengan pantomim/bisu</p>
-              </div>
-            </div>
-            <input
-              type="checkbox"
-              checked={config.enabledSpecialRoles.includes('MR_MEME')}
-              onChange={() => handleToggleSpecialRole('MR_MEME')}
-              className="w-5 h-5 accent-chameleon-emerald rounded cursor-pointer"
-            />
-          </label>
-
-          {/* The Revenger */}
-          <label className={`flex items-center justify-between p-2.5 rounded-xl border select-none ${
-            playerCount < 5 
-              ? 'opacity-40 bg-theme-bg-card-subtle/50 border-theme-border cursor-not-allowed'
-              : 'bg-theme-bg-card-subtle border-theme-border cursor-pointer'
-          }`}>
-            <div className="flex items-center gap-2.5">
-              <span className="text-xl">⚔️</span>
-              <div>
-                <p className="font-bold text-xs text-theme-text-main">
-                  The Revenger {playerCount < 5 && <span className="text-[10px] text-chameleon-rose font-normal">(Min. 5 pemain)</span>}
-                </p>
-                <p className="text-[11px] text-theme-text-muted">Saat dieliminasi, berhak menyeret 1 pemain lain ikut keluar</p>
-              </div>
-            </div>
-            <input
-              type="checkbox"
-              disabled={playerCount < 5}
-              checked={config.enabledSpecialRoles.includes('THE_REVENGER')}
-              onChange={() => handleToggleSpecialRole('THE_REVENGER')}
-              className="w-5 h-5 accent-chameleon-emerald rounded cursor-pointer"
-            />
-          </label>
-
-          {/* The Joy Fool */}
-          <label className="flex items-center justify-between p-2.5 rounded-xl bg-theme-bg-card-subtle border border-theme-border cursor-pointer select-none">
-            <div className="flex items-center gap-2.5">
-              <span className="text-xl">🤡</span>
-              <div>
-                <p className="font-bold text-xs text-theme-text-main">The Joy Fool</p>
-                <p className="text-[11px] text-theme-text-muted">Dapat bonus +4 poin jika menjadi pemain pertama yang gugur di ronde 1</p>
-              </div>
-            </div>
-            <input
-              type="checkbox"
-              checked={config.enabledSpecialRoles.includes('THE_JOY_FOOL')}
-              onChange={() => handleToggleSpecialRole('THE_JOY_FOOL')}
-              className="w-5 h-5 accent-chameleon-emerald rounded cursor-pointer"
-            />
-          </label>
-        </div>
-      </div>
-
-      {/* Word Categories & Personal Words */}
-      <div className="space-y-3 p-4 rounded-2xl bg-theme-bg-card border border-theme-border">
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold text-sm text-theme-text-main flex items-center gap-1.5">
-            <BookOpen className="w-4 h-4 text-chameleon-emerald" /> Kategori Kata ({allPairs.length} Pasang)
-          </h3>
-          <button
-            type="button"
-            onClick={onOpenPersonalWords}
-            className="text-xs text-chameleon-emerald hover:underline font-semibold flex items-center gap-1"
-          >
-            <Plus className="w-3.5 h-3.5" /> Kata Kustom
-          </button>
-        </div>
-
-        <div className="flex flex-wrap gap-1.5">
-          {CATEGORIES.map(cat => {
-            const isSelected = config.selectedCategories.includes(cat);
-            return (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => handleToggleCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 ${
-                  isSelected
-                    ? 'bg-chameleon-emerald text-white shadow-xs'
-                    : 'bg-theme-bg-card-subtle text-theme-text-muted hover:text-theme-text-main'
-                }`}
-              >
-                {isSelected && <Check className="w-3.5 h-3.5" />}
-                {cat}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Discussion Timer Setting */}
-      <div className="p-4 rounded-2xl bg-theme-bg-card border border-theme-border flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-chameleon-amber" />
-          <div>
-            <p className="text-xs font-bold text-theme-text-main">Timer Diskusi</p>
-            <p className="text-[11px] text-theme-text-muted">Batas waktu berdebat sebelum voting</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1">
-          {[0, 30, 60, 90].map(sec => (
-            <button
-              key={sec}
               type="button"
-              onClick={() => {
-                soundEffects.playClick();
-                onUpdateConfig({ ...config, discussionTimerSeconds: sec });
-              }}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
-                config.discussionTimerSeconds === sec
-                  ? 'bg-chameleon-amber text-black'
-                  : 'bg-theme-bg-card-subtle text-theme-text-muted'
+              onClick={handleToggleBgm}
+              aria-label="Musik Latar Belakang"
+              title="Putar / Hentikan Musik Latar"
+              className={`w-11 h-11 rounded-full flex items-center justify-center shadow-md border btn-tactile ${
+                isBgmActive
+                  ? 'bg-emerald-600 text-white border-emerald-400'
+                  : 'bg-slate-800 text-slate-400 border-slate-700'
               }`}
             >
-              {sec === 0 ? 'Bebas' : `${sec}s`}
+              <Music className="w-5 h-5" />
             </button>
-          ))}
+            <span className="text-[10px] font-bold text-slate-400 mt-1">
+              {isBgmActive ? 'BGM On' : 'BGM'}
+            </span>
+          </div>
+
+          {/* Group Button */}
+          <div className="flex flex-col items-center">
+            <button
+              type="button"
+              onClick={() => {
+                soundEffects.playPop();
+                setIsGroupModalOpen(true);
+              }}
+              aria-label="Grup Pemain"
+              className="w-11 h-11 rounded-full bg-sky-600 hover:bg-sky-500 text-white flex items-center justify-center shadow-md border border-sky-400/40 btn-tactile"
+            >
+              <Users className="w-5 h-5 fill-current" />
+            </button>
+            <span className="text-[11px] font-bold text-sky-400 mt-1">Grup</span>
+          </div>
         </div>
       </div>
 
-      {/* Bottom Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-theme-bg/95 backdrop-blur-md border-t border-theme-border z-30">
-        <div className="max-w-xl mx-auto">
+      {/* ================= CENTER SLIDER & TITLE ================= */}
+      <div className="my-auto py-2 space-y-6">
+        {/* Player Count Title */}
+        <div className="text-center">
+          <h2 className="text-3xl font-black text-white tracking-wide">
+            Pemain: {playerCount}
+          </h2>
+        </div>
+
+        {/* Player Slider with Avatar Thumb */}
+        <div className="px-2">
+          <div className="relative flex items-center h-12">
+            {/* Custom Track Background */}
+            <div className="w-full h-2 rounded-full bg-slate-700 relative overflow-hidden">
+              {/* Active Progress (Solid Amber) */}
+              <div 
+                className="h-full bg-amber-400 transition-all duration-75"
+                style={{ width: `${sliderPercent}%` }}
+              />
+            </div>
+
+            {/* Slider Avatar Thumb */}
+            <div 
+              className="absolute pointer-events-none transform -translate-x-1/2 -translate-y-1 transition-all duration-75"
+              style={{ left: `${sliderPercent}%` }}
+            >
+              <SliderBoyThumb className="w-11 h-11 filter drop-shadow-md" />
+            </div>
+
+            <input
+              type="range"
+              min={sliderMin}
+              max={sliderMax}
+              value={playerCount}
+              onChange={handleSliderChange}
+              className="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer"
+            />
+          </div>
+        </div>
+
+        {/* ================= CARD 1: ROLE COMPOSITION (Solid Card) ================= */}
+        <div className="bg-[#E2E8F0] text-slate-800 rounded-3xl p-5 shadow-lg space-y-3.5">
+          {/* Civilian Pill */}
+          <div className="flex justify-center">
+            <span className="px-6 py-2 rounded-full bg-sky-600 text-white font-extrabold text-sm shadow-xs tracking-wide">
+              {civilianCount} Civilian
+            </span>
+          </div>
+
+          {/* Undercover Stepper Pill */}
+          <div className="flex items-center justify-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                if (config.undercoverCount > 1) {
+                  soundEffects.playPop();
+                  onUpdateConfig({ ...config, undercoverCount: config.undercoverCount - 1 });
+                }
+              }}
+              disabled={config.undercoverCount <= 1}
+              className="w-7 h-7 rounded-full bg-black text-white font-black text-sm flex items-center justify-center disabled:opacity-30 btn-tactile"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+
+            <span className="px-7 py-2 rounded-full bg-black text-white font-extrabold text-sm shadow-xs">
+              {config.undercoverCount} Undercover
+            </span>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (civilianCount > 2) {
+                  soundEffects.playPop();
+                  onUpdateConfig({ ...config, undercoverCount: config.undercoverCount + 1 });
+                }
+              }}
+              disabled={civilianCount <= 2}
+              className="w-7 h-7 rounded-full bg-black text-white font-black text-sm flex items-center justify-center disabled:opacity-30 btn-tactile"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Mr. White Stepper Pill */}
+          <div className="flex items-center justify-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => {
+                if (config.mrWhiteCount > 0) {
+                  soundEffects.playPop();
+                  onUpdateConfig({ ...config, mrWhiteCount: config.mrWhiteCount - 1 });
+                }
+              }}
+              disabled={config.mrWhiteCount <= 0}
+              className="w-7 h-7 rounded-full bg-white text-black font-black text-sm flex items-center justify-center shadow-xs border border-slate-300 disabled:opacity-30 btn-tactile"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+
+            <span className="px-7 py-2 rounded-full bg-white text-black font-extrabold text-sm shadow-xs border border-slate-300">
+              {config.mrWhiteCount} Mr. White
+            </span>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (civilianCount > 2) {
+                  soundEffects.playPop();
+                  onUpdateConfig({ ...config, mrWhiteCount: config.mrWhiteCount + 1 });
+                }
+              }}
+              disabled={civilianCount <= 2}
+              className="w-7 h-7 rounded-full bg-white text-black font-black text-sm flex items-center justify-center shadow-xs border border-slate-300 disabled:opacity-30 btn-tactile"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {!validation.valid && (
+            <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-rose-600 pt-1 text-center">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>{validation.reason}</span>
+            </div>
+          )}
+        </div>
+
+        {/* ================= CARD 2: KATA-KATA (Solid Capsule) ================= */}
+        <div 
+          onClick={() => {
+            soundEffects.playPop();
+            setIsCategoriesModalOpen(true);
+          }}
+          className="bg-[#E2E8F0] rounded-2xl py-3 px-6 text-center shadow-md cursor-pointer hover:bg-slate-200 max-w-[200px] mx-auto btn-tactile"
+        >
+          <p className="text-[11px] font-semibold text-slate-500">
+            Kata-kata
+          </p>
+          <p className="text-sm font-black text-rose-600">
+            {config.selectedCategories.length === 6 ? 'Standar' : `${config.selectedCategories.length} Kategori`}
+          </p>
+        </div>
+      </div>
+
+      {/* ================= BOTTOM ACTION BAR (Solid Emerald) ================= */}
+      <div className="relative pt-4 pb-2">
+        {/* Mulai Button: Clean Solid Emerald */}
+        <div className="flex justify-center">
           <button
             type="button"
             onClick={() => {
               if (validation.valid) {
-                soundEffects.playClick();
+                soundEffects.playPop();
                 triggerHaptic('medium');
                 onStartGame();
               }
             }}
             disabled={!validation.valid}
-            className="w-full py-4 rounded-2xl bg-chameleon-emerald text-white font-extrabold text-base shadow-lg shadow-chameleon-emerald/25 hover:bg-chameleon-emerald-dark active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full max-w-xs py-4 px-8 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-lg shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center tracking-wide btn-tactile"
           >
-            <Play className="w-5 h-5 fill-current" />
-            Mulai Permainan ({playerCount} Pemain)
+            Mulai
+          </button>
+        </div>
+
+        {/* Floating Settings & Help Buttons on Bottom Right */}
+        <div className="absolute right-0 bottom-2 flex flex-col gap-2.5">
+          {/* Settings Pink Button */}
+          <button
+            type="button"
+            onClick={() => {
+              soundEffects.playPop();
+              onOpenScoreboard();
+            }}
+            aria-label="Pengaturan & Papan Skor"
+            className="w-11 h-11 rounded-full bg-pink-600 hover:bg-pink-500 text-white flex items-center justify-center shadow-lg border border-pink-400/50 btn-tactile"
+          >
+            <Settings className="w-5 h-5 fill-current stroke-none" />
+          </button>
+
+          {/* Help Blue Question Mark Button */}
+          <button
+            type="button"
+            onClick={() => {
+              soundEffects.playPop();
+              onOpenRulebook();
+            }}
+            aria-label="Bantuan & Aturan"
+            className="w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center shadow-lg border border-blue-400/50 font-black text-lg btn-tactile"
+          >
+            ?
           </button>
         </div>
       </div>
+
+      {/* Sub-modals */}
+      <GroupPlayersModal
+        isOpen={isGroupModalOpen}
+        onClose={() => setIsGroupModalOpen(false)}
+        profiles={profiles}
+        onUpdateProfiles={onUpdateProfiles}
+      />
+
+      <CategoriesModal
+        isOpen={isCategoriesModalOpen}
+        onClose={() => setIsCategoriesModalOpen(false)}
+        selectedCategories={config.selectedCategories}
+        totalWordPairsCount={allPairs.length}
+        onToggleCategory={handleToggleCategory}
+        onOpenPersonalWords={onOpenPersonalWords}
+      />
     </div>
   );
 };

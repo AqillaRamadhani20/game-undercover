@@ -35,7 +35,9 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+        heading: ['Outfit', 'sans-serif'],
+        display: ['Outfit', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.25s ease-out',

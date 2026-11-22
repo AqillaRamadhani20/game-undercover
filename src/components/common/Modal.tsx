@@ -31,14 +31,14 @@ export const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
       <div 
-        className={`w-full ${maxWidth} bg-theme-bg-card border border-theme-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-scale-up`}
+        className={`w-full ${maxWidth} bg-slate-900/95 border-2 border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-scale-up text-white`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-theme-border bg-theme-bg-card-subtle/50">
-          <h3 className="text-lg font-bold text-theme-text-main flex items-center gap-2">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-950/60">
+          <h3 className="text-base font-black text-white flex items-center gap-2">
             {title}
           </h3>
           <button
@@ -47,14 +47,14 @@ export const Modal: React.FC<ModalProps> = ({
               onClose();
             }}
             aria-label="Tutup"
-            className="p-1.5 rounded-lg text-theme-text-muted hover:text-theme-text-main hover:bg-theme-bg-card-subtle transition-colors"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 overflow-y-auto space-y-4 text-theme-text-main">
+        <div className="p-5 overflow-y-auto space-y-4 text-white">
           {children}
         </div>
       </div>

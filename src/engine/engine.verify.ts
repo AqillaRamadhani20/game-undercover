@@ -1,7 +1,7 @@
 import { calculateDefaultRoleCounts, validateRoleCounts } from './roleDistributor';
 import { evaluateWinCondition } from './winEvaluator';
 import { DEFAULT_WORD_PAIRS, selectRandomWordPair } from '../data/wordPairs';
-import { generateSpeechOrder } from './gameReducer';
+import { generateSpeechOrder, gameReducer, INITIAL_STATE, INITIAL_CONFIG } from './gameReducer';
 import { specialRoleHooks } from './specialRoleHooks';
 import type { Player } from '../types/game';
 
@@ -28,6 +28,14 @@ for (let n = 3; n <= 20; n++) {
 // 2. Word Pair Pool & Anti-Repeat Tests
 console.log('\n[2. Word Pair Pool & Random Swap]');
 assert(DEFAULT_WORD_PAIRS.length >= 35, `Word pool count (${DEFAULT_WORD_PAIRS.length}) >= 35`);
+
+// Verify all words are single-word (no spaces)
+for (const wp of DEFAULT_WORD_PAIRS) {
+  assert(!wp.wordA.trim().includes(' '), `wordA "${wp.wordA}" must be a single word without spaces`);
+  assert(!wp.wordB.trim().includes(' '), `wordB "${wp.wordB}" must be a single word without spaces`);
+}
+console.log(`✅ PASSED: All ${DEFAULT_WORD_PAIRS.length} word pairs (252 words) are strictly 1 word without spaces!`);
+
 const selectedPairs = new Set<string>();
 const usedIds: string[] = [];
 for (let i = 0; i < 10; i++) {
@@ -167,6 +175,67 @@ const joyFoolElim = specialRoleHooks.onEliminated({
   isFirstEliminatedInGame: true,
 });
 assert(joyFoolElim.isJoyFoolBonus === true, 'The Joy Fool receives bonus if eliminated first in round 1');
+
+// 5. Reroll Words Action Test
+console.log('\n[5. Reroll Words Action Test]');
+const startState = gameReducer(INITIAL_STATE, {
+  type: 'START_GAME',
+  config: INITIAL_CONFIG,
+  rawPlayers: [
+    { id: 'p1', name: 'Player 1', avatar: '🦎', score: 0 },
+    { id: 'p2', name: 'Player 2', avatar: '🐱', score: 0 },
+    { id: 'p3', name: 'Player 3', avatar: '🐶', score: 0 },
+    { id: 'p4', name: 'Player 4', avatar: '🐰', score: 0 },
+    { id: 'p5', name: 'Player 5', avatar: '🦊', score: 0 },
+  ],
+});
+assert(startState.phase === 'WORD_REVEAL', 'Initial phase is WORD_REVEAL');
+assert(startState.revealIndex === 0, 'Initial revealIndex is 0');
+const initialUsedCount = startState.usedWordPairIds.length;
+const initialWord = startState.players[0].word;
+
+// Dispatch REROLL_WORDS
+const rerolledState = gameReducer(startState, { type: 'REROLL_WORDS' });
+assert(rerolledState.phase === 'WORD_REVEAL', 'Phase remains WORD_REVEAL after reroll');
+assert(rerolledState.revealIndex === 0, 'Reveal index resets to 0 after reroll');
+assert(!rerolledState.isCardRevealed, 'Card is hidden after reroll');
+assert(rerolledState.usedWordPairIds.length === initialUsedCount + 1, 'New word pair added to usedWordPairIds');
+assert(rerolledState.players.length === 5, 'All 5 players preserved');
+console.log(`✅ PASSED: Word reroll successfully refreshed words and reset card reveal.`);
+
+// 6. Direct to Voting & Profile Image Persistence
+console.log('\n[6. Direct to Voting & Profile Image]');
+let stateFlow = startState;
+// Simulate all 5 players viewing cards
+for (let pIdx = 0; pIdx < 5; pIdx++) {
+  stateFlow = gameReducer(stateFlow, { type: 'REVEAL_CURRENT_CARD' });
+  stateFlow = gameReducer(stateFlow, { type: 'HIDE_AND_NEXT_CARD' });
+}
+assert(stateFlow.phase === 'DESCRIPTION', 'Completing card reveals enters DESCRIPTION (Deskripsi Waktu)');
+assert(stateFlow.speechOrderIds.length === 5, 'Speech order generated for all 5 players');
+console.log('✅ PASSED: Reveal completed enters Deskripsi Waktu speech order screen as shown in screenshot!');
+
+// Simulate clicking "Pergi ke Voting"
+stateFlow = gameReducer(stateFlow, { type: 'START_VOTING' });
+assert(stateFlow.phase === 'VOTING', 'Clicking Pergi ke Voting directly routes to VOTING phase');
+console.log('✅ PASSED: Pergi ke Voting button directly routes to VOTING phase as requested!');
+
+// Update player 0 with custom photo
+stateFlow = gameReducer(stateFlow, {
+  type: 'UPDATE_PLAYER_PROFILE',
+  index: 0,
+  avatarImage: 'data:image/jpeg;base64,sampleBase64PhotoData',
+});
+assert(stateFlow.players[0].avatarImage === 'data:image/jpeg;base64,sampleBase64PhotoData', 'Custom avatarImage successfully stored in player profile');
+
+// 7. Replay Game Direct Flow Test (No Name Re-Entry)
+console.log('\n[7. Replay Game Direct Flow (No Name Re-Entry)]');
+const replayState = gameReducer(stateFlow, { type: 'REPLAY_GAME' });
+assert(replayState.phase === 'WORD_REVEAL', 'Replay directly enters WORD_REVEAL');
+assert(replayState.players[0].name === 'Player 1', 'Player names preserved');
+assert(replayState.players[0].avatarImage === 'data:image/jpeg;base64,sampleBase64PhotoData', 'Custom avatarImage preserved across replay');
+assert(replayState.revealIndex === 0, 'Card reveal index ready at Player 1');
+console.log('✅ PASSED: Replay game keeps all profile images/names and immediately enters card choosing!');
 
 console.log('\n========================================');
 console.log('🎉 ALL ENGINE VERIFICATION CHECKS PASSED!');

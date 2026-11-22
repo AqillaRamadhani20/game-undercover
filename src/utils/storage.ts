@@ -12,19 +12,28 @@ export const DEFAULT_AVATARS = [
 ];
 
 export const DEFAULT_PLAYER_PROFILES: PlayerProfile[] = [
-  { id: 'p-1', name: 'Budi', avatar: '🦎', totalGames: 0, totalWins: 0, totalScore: 0 },
-  { id: 'p-2', name: 'Siti', avatar: '🦊', totalGames: 0, totalWins: 0, totalScore: 0 },
-  { id: 'p-3', name: 'Andi', avatar: '🐱', totalGames: 0, totalWins: 0, totalScore: 0 },
-  { id: 'p-4', name: 'Rina', avatar: '🐼', totalGames: 0, totalWins: 0, totalScore: 0 },
-  { id: 'p-5', name: 'Doni', avatar: '🐯', totalGames: 0, totalWins: 0, totalScore: 0 },
+  { id: 'p-1', name: '', avatar: '🦎', totalGames: 0, totalWins: 0, totalScore: 0 },
+  { id: 'p-2', name: '', avatar: '🦊', totalGames: 0, totalWins: 0, totalScore: 0 },
+  { id: 'p-3', name: '', avatar: '🐱', totalGames: 0, totalWins: 0, totalScore: 0 },
+  { id: 'p-4', name: '', avatar: '🐼', totalGames: 0, totalWins: 0, totalScore: 0 },
+  { id: 'p-5', name: '', avatar: '🐯', totalGames: 0, totalWins: 0, totalScore: 0 },
 ];
+
+const DUMMY_NAMES = ['Budi', 'Siti', 'Andi', 'Rina', 'Doni'];
 
 export function loadSavedProfiles(): PlayerProfile[] {
   try {
     const raw = localStorage.getItem(PLAYERS_KEY);
     if (!raw) return DEFAULT_PLAYER_PROFILES;
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length >= 3 ? parsed : DEFAULT_PLAYER_PROFILES;
+    if (Array.isArray(parsed) && parsed.length >= 3) {
+      // Clear out legacy dummy names (Budi, Siti, etc.) so names start fresh and empty
+      return parsed.map(p => ({
+        ...p,
+        name: DUMMY_NAMES.includes(p.name) ? '' : p.name,
+      }));
+    }
+    return DEFAULT_PLAYER_PROFILES;
   } catch {
     return DEFAULT_PLAYER_PROFILES;
   }

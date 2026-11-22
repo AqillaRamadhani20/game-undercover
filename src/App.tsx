@@ -1,16 +1,14 @@
 import { useReducer, useState, useEffect } from 'react';
-import { 
-  gameReducer, 
-  INITIAL_STATE, 
-  INITIAL_CONFIG 
+import {
+  gameReducer,
+  INITIAL_STATE,
+  INITIAL_CONFIG
 } from './engine/gameReducer';
-import { 
-  loadSavedProfiles, 
-  savePlayerProfiles, 
-  updateCumulativeScores, 
-  resetCumulativeScores, 
-  loadSavedTheme, 
-  saveTheme,
+import {
+  loadSavedProfiles,
+  savePlayerProfiles,
+  updateCumulativeScores,
+  resetCumulativeScores,
   loadSavedConfig,
   saveConfig
 } from './utils/storage';
@@ -40,7 +38,6 @@ export function App() {
   // Persistent States
   const [profiles, setProfiles] = useState<PlayerProfile[]>(() => loadSavedProfiles());
   const [personalWords, setPersonalWords] = useState<WordPair[]>(() => getStoredPersonalWords());
-  const [isDark, setIsDark] = useState<boolean>(() => loadSavedTheme());
   const [config, setConfig] = useState<GameConfig>(() => {
     const saved = loadSavedConfig();
     return saved ? { ...INITIAL_CONFIG, ...saved } : INITIAL_CONFIG;
@@ -50,16 +47,6 @@ export function App() {
   const [isRulebookOpen, setIsRulebookOpen] = useState(false);
   const [isScoreboardOpen, setIsScoreboardOpen] = useState(false);
   const [isPersonalWordsOpen, setIsPersonalWordsOpen] = useState(false);
-
-  // Sync theme class to document body
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    saveTheme(isDark);
-  }, [isDark]);
 
   // Sync config to localStorage
   const handleUpdateConfig = (newConfig: GameConfig) => {
@@ -101,18 +88,24 @@ export function App() {
     enabledRoles: state.config.enabledSpecialRoles,
   });
 
+  const showUniversalHeader = 
+    state.phase !== 'LOBBY' && 
+    state.phase !== 'WORD_REVEAL' && 
+    state.phase !== 'DESCRIPTION';
+
   return (
-    <div className="min-h-screen bg-theme-bg text-theme-text-main flex flex-col font-sans transition-colors duration-200">
-      {/* Universal Header */}
-      <Header
-        phase={state.phase}
-        round={state.round}
-        isDark={isDark}
-        onToggleTheme={() => setIsDark(!isDark)}
-        onOpenRulebook={() => setIsRulebookOpen(true)}
-        onOpenScoreboard={() => setIsScoreboardOpen(true)}
-        onResetToLobby={() => dispatch({ type: 'RESET_TO_LOBBY' })}
-      />
+    <div className="min-h-screen bg-[#0C0B1E] text-white flex flex-col font-sans selection:bg-cyan-500 selection:text-white">
+      {/* Universal Header (only in phases where integrated header isn't used) */}
+      {showUniversalHeader && (
+        <Header
+          phase={state.phase}
+          round={state.round}
+          onOpenRulebook={() => setIsRulebookOpen(true)}
+          onOpenScoreboard={() => setIsScoreboardOpen(true)}
+          onResetToLobby={() => dispatch({ type: 'RESET_TO_LOBBY' })}
+          onRerollWords={() => dispatch({ type: 'REROLL_WORDS' })}
+        />
+      )}
 
       {/* Main Screen Router based on FSM State */}
       <main className="flex-1 w-full">
@@ -130,11 +123,14 @@ export function App() {
                   id: p.id,
                   name: p.name,
                   avatar: p.avatar,
+                  avatarImage: p.avatarImage,
                   score: 0,
                 })),
               });
             }}
             onOpenPersonalWords={() => setIsPersonalWordsOpen(true)}
+            onOpenRulebook={() => setIsRulebookOpen(true)}
+            onOpenScoreboard={() => setIsScoreboardOpen(true)}
           />
         )}
 
@@ -144,6 +140,10 @@ export function App() {
             playerIndex={state.revealIndex}
             totalPlayers={state.players.length}
             isCardRevealed={state.isCardRevealed}
+            undercoverCount={state.config.undercoverCount}
+            mrWhiteCount={state.config.mrWhiteCount}
+            activeSpecialRoles={state.config.enabledSpecialRoles}
+            savedProfiles={profiles}
             partnerPlayer={
               state.players[state.revealIndex]?.loverPartnerId
                 ? state.players.find(p => p.id === state.players[state.revealIndex].loverPartnerId)
@@ -151,6 +151,28 @@ export function App() {
             }
             onRevealCard={() => dispatch({ type: 'REVEAL_CURRENT_CARD' })}
             onHideAndNext={() => dispatch({ type: 'HIDE_AND_NEXT_CARD' })}
+            onReturnToLobby={() => dispatch({ type: 'RESET_TO_LOBBY' })}
+            onOpenRulebook={() => setIsRulebookOpen(true)}
+            onUpdatePlayerName={(name) => dispatch({ type: 'UPDATE_PLAYER_NAME', index: state.revealIndex, name })}
+            onUpdatePlayerProfile={(updates) => {
+              dispatch({ type: 'UPDATE_PLAYER_PROFILE', index: state.revealIndex, ...updates });
+              const curPlayer = state.players[state.revealIndex];
+              if (curPlayer) {
+                const updated = profiles.map(p => {
+                  if (p.id === curPlayer.id) {
+                    return {
+                      ...p,
+                      name: updates.name ?? p.name,
+                      avatar: updates.avatar ?? p.avatar,
+                      avatarImage: updates.avatarImage ?? p.avatarImage,
+                    };
+                  }
+                  return p;
+                });
+                handleUpdateProfiles(updated);
+              }
+            }}
+            onRerollWords={() => dispatch({ type: 'REROLL_WORDS' })}
           />
         )}
 
@@ -159,10 +181,13 @@ export function App() {
             round={state.round}
             players={state.players}
             speechOrderIds={state.speechOrderIds}
-            currentSpeakerIndex={state.currentSpeakerIndex}
-            memeCursePlayerId={state.memeCursePlayerId}
-            onNextSpeaker={() => dispatch({ type: 'NEXT_SPEAKER' })}
-            onStartDiscussion={() => dispatch({ type: 'START_DISCUSSION' })}
+            undercoverCount={state.config.undercoverCount}
+            mrWhiteCount={state.config.mrWhiteCount}
+            onStartVoting={() => dispatch({ type: 'START_VOTING' })}
+            onReturnToLobby={() => dispatch({ type: 'RESET_TO_LOBBY' })}
+            onOpenRulebook={() => setIsRulebookOpen(true)}
+            onOpenScoreboard={() => setIsScoreboardOpen(true)}
+            onRerollWords={() => dispatch({ type: 'REROLL_WORDS' })}
           />
         )}
 

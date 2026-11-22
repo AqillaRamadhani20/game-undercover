@@ -24,9 +24,9 @@ export const TieBreakerModal: React.FC<TieBreakerModalProps> = ({
   const tiedPlayers = players.filter(p => tiedPlayerIds.includes(p.id));
 
   return (
-    <Modal isOpen={isOpen} onClose={() => {}} title="Hasil Voting Seri! ⚖️" maxWidth="max-w-md">
+    <Modal isOpen={isOpen} onClose={() => { }} title="Hasil Voting Seri! ⚖️" maxWidth="max-w-md">
       <div className="space-y-4">
-        <div className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs text-amber-700 dark:text-amber-300">
+        <div className="p-3.5 rounded-2xl bg-amber-500/15 border border-amber-400/40 text-xs text-amber-200">
           Suara terbanyak diperoleh seimbang oleh:{' '}
           <span className="font-bold">
             {tiedPlayers.map(p => p.name).join(' dan ')}
@@ -36,12 +36,12 @@ export const TieBreakerModal: React.FC<TieBreakerModalProps> = ({
 
         {/* Option 1: Goddess of Justice Decision (if present) */}
         {hasGoddess && goddessPlayer && (
-          <div className="p-3.5 rounded-2xl bg-chameleon-purple/15 border border-chameleon-purple/40 space-y-3">
-            <div className="flex items-center gap-2 text-chameleon-purple font-bold text-xs">
+          <div className="p-3.5 rounded-2xl bg-purple-500/15 border border-purple-400/40 space-y-3">
+            <div className="flex items-center gap-2 text-purple-300 font-bold text-xs">
               <Scale className="w-4 h-4" />
               <span>Keputusan Goddess of Justice ({goddessPlayer.name})</span>
             </div>
-            <p className="text-[11px] text-theme-text-muted">
+            <p className="text-[11px] text-slate-300">
               Dewi Keadilan memiliki hak mutlak untuk memilih siapa di antara pemain seri yang harus tereliminasi:
             </p>
 
@@ -55,7 +55,7 @@ export const TieBreakerModal: React.FC<TieBreakerModalProps> = ({
                     triggerHaptic('heavy');
                     onResolveTie('GODDESS', p.id);
                   }}
-                  className="p-2.5 rounded-xl bg-theme-bg-card border border-theme-border hover:border-chameleon-purple font-bold text-xs text-theme-text-main flex items-center justify-center gap-2 transition"
+                  className="p-2.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-purple-400 font-bold text-xs text-white flex items-center justify-center gap-2 btn-tactile"
                 >
                   <span>{p.avatar}</span>
                   <span>{p.name}</span>
@@ -66,12 +66,12 @@ export const TieBreakerModal: React.FC<TieBreakerModalProps> = ({
         )}
 
         {/* Option 2: Suit Manual (RPS) */}
-        <div className="p-3.5 rounded-2xl bg-theme-bg-card-subtle border border-theme-border space-y-3">
-          <div className="flex items-center gap-2 text-chameleon-sky font-bold text-xs">
+        <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-3">
+          <div className="flex items-center gap-2 text-sky-400 font-bold text-xs">
             <Swords className="w-4 h-4" />
             <span>Suit Manual (Batu-Gunting-Kertas)</span>
           </div>
-          <p className="text-[11px] text-theme-text-muted">
+          <p className="text-[11px] text-slate-300">
             Lakukan suit manual di dunia nyata antara pemain seri. Pilih siapa yang kalah untuk dieliminasi:
           </p>
 
@@ -85,7 +85,7 @@ export const TieBreakerModal: React.FC<TieBreakerModalProps> = ({
                   triggerHaptic('heavy');
                   onResolveTie('SUIT', p.id);
                 }}
-                className="p-2.5 rounded-xl bg-theme-bg-card border border-theme-border hover:border-chameleon-sky font-bold text-xs text-theme-text-main flex items-center justify-center gap-2 transition"
+                className="p-2.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-sky-400 font-bold text-xs text-white flex items-center justify-center gap-2 btn-tactile"
               >
                 <span>{p.avatar}</span>
                 <span>{p.name} Kalah</span>
@@ -98,12 +98,12 @@ export const TieBreakerModal: React.FC<TieBreakerModalProps> = ({
         <button
           type="button"
           onClick={() => {
-            soundEffects.playClick();
+            soundEffects.playPop();
             onResolveTie('REVOTE');
           }}
-          className="w-full py-3 px-4 rounded-xl bg-theme-bg-card border border-theme-border hover:bg-theme-border text-xs font-bold text-theme-text-main transition flex items-center justify-center gap-2"
+          className="w-full py-3.5 px-4 rounded-full bg-slate-800 border border-slate-700 hover:bg-slate-700 text-xs font-bold text-white transition flex items-center justify-center gap-2 btn-tactile"
         >
-          <RotateCcw className="w-4 h-4 text-chameleon-emerald" />
+          <RotateCcw className="w-4 h-4 text-emerald-400" />
           <span>Voting Ulang (Hanya Antara Pemain Seri)</span>
         </button>
       </div>

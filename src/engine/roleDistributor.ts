@@ -74,7 +74,7 @@ export function shuffleArray<T>(array: T[]): T[] {
  * Assigns main roles, words, and optional special roles
  */
 export function distributeRolesAndWords(
-  rawPlayers: Array<{ id: string; name: string; avatar: string; score?: number }>,
+  rawPlayers: Array<{ id: string; name: string; avatar: string; avatarImage?: string; score?: number }>,
   undercoverCount: number,
   mrWhiteCount: number,
   civilianWord: string,
@@ -108,6 +108,7 @@ export function distributeRolesAndWords(
       id: p.id,
       name: p.name,
       avatar: p.avatar,
+      avatarImage: p.avatarImage,
       role,
       specialRole: null,
       loverPartnerId: null,
