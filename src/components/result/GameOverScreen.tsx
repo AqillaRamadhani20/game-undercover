@@ -84,6 +84,15 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
 
   const winnerInfo = getWinnerInfo();
 
+  // Sort players by total score descending to show final rankings
+  const rankedPlayers = [...players].sort((a, b) => {
+    const scoreA = (a.score || 0) + (roundScoreDeltas[a.id] || 0);
+    const scoreB = (b.score || 0) + (roundScoreDeltas[b.id] || 0);
+    if (scoreB !== scoreA) return scoreB - scoreA;
+    if (a.isAlive !== b.isAlive) return a.isAlive ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+
   return (
     <div className="min-h-screen undercover-solid-bg flex flex-col justify-between max-w-md mx-auto px-5 py-5 select-none relative z-10 pb-28">
       {/* Victory Banner (Frosted Glass Papan) */}
@@ -124,28 +133,57 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
       {/* Final Player Roster & Scores */}
       <div className="space-y-3 my-2">
         <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1 font-heading">
-          Peran & Skor Akhir Pemain:
+          Peringkat & Skor Akhir Pemain:
         </h4>
 
         <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-          {players.map(p => {
+          {rankedPlayers.map((p, idx) => {
+            const rank = idx + 1;
             const delta = roundScoreDeltas[p.id] || 0;
             return (
               <div
                 key={p.id}
-                className="p-3 rounded-2xl papan-glass flex items-center justify-between shadow-sm"
+                className={`p-3 rounded-2xl border flex items-center justify-between shadow-sm transition-all ${
+                  rank === 1
+                    ? 'papan-glass border-amber-400/50 shadow-sm'
+                    : rank === 2
+                    ? 'papan-glass border-slate-300/40'
+                    : rank === 3
+                    ? 'papan-glass border-amber-700/40'
+                    : 'papan-glass border-white/5'
+                }`}
               >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-lg overflow-hidden shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="shrink-0 flex items-center justify-center">
+                    {rank === 1 ? (
+                      <div className="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-400 text-amber-300 flex items-center justify-center font-black text-[11px] font-heading">
+                        #1
+                      </div>
+                    ) : rank === 2 ? (
+                      <div className="w-6 h-6 rounded-full bg-slate-300/20 border border-slate-300 text-slate-200 flex items-center justify-center font-black text-[11px] font-heading">
+                        #2
+                      </div>
+                    ) : rank === 3 ? (
+                      <div className="w-6 h-6 rounded-full bg-amber-700/20 border border-amber-600 text-amber-400 flex items-center justify-center font-black text-[11px] font-heading">
+                        #3
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 text-slate-400 flex items-center justify-center font-bold text-[11px] font-heading">
+                        #{rank}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-lg overflow-hidden shrink-0">
                     {p.avatarImage ? (
                       <img src={p.avatarImage} alt={p.name} className="w-full h-full object-cover" />
                     ) : (
-                      <span className="text-xs font-bold text-white">{p.name.charAt(0).toUpperCase()}</span>
+                      <span className="text-xs font-bold text-white">{(p.name.trim() || `P${rank}`).charAt(0).toUpperCase()}</span>
                     )}
                   </div>
                   <div>
                     <p className="text-xs font-bold text-white flex items-center gap-1.5 font-heading">
-                      <span>{p.name.trim() || `Pemain ${players.indexOf(p) + 1}`}</span>
+                      <span>{p.name.trim() || `Pemain ${rank}`}</span>
                       {!p.isAlive && (
                         <span className="text-[10px] text-slate-500 font-normal">(Gugur)</span>
                       )}
@@ -163,7 +201,7 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
                     {delta > 0 ? `+${delta}` : '0'} pts
                   </span>
                   <p className="text-[10px] text-slate-400 font-normal">
-                    Total: {p.score} pts
+                    Total: {p.score + delta} pts
                   </p>
                 </div>
               </div>

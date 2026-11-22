@@ -127,7 +127,7 @@ export function App() {
                   name: p.name,
                   avatar: p.avatar,
                   avatarImage: p.avatarImage,
-                  score: 0,
+                  score: p.totalScore ?? 0,
                 })),
               });
             }}
@@ -183,6 +183,7 @@ export function App() {
           <DescriptionScreen
             round={state.round}
             players={state.players}
+            profiles={profiles}
             speechOrderIds={state.speechOrderIds}
             undercoverCount={state.config.undercoverCount}
             mrWhiteCount={state.config.mrWhiteCount}

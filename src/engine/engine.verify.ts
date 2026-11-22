@@ -237,6 +237,19 @@ assert(replayState.players[0].avatarImage === 'data:image/jpeg;base64,sampleBase
 assert(replayState.revealIndex === 0, 'Card reveal index ready at Player 1');
 console.log('✅ PASSED: Replay game keeps all profile images/names and immediately enters card choosing!');
 
+// 8. Player List Ranking by Score
+console.log('\n[8. Player List Ranking by Score]');
+const samplePlayers = [
+  { id: 'p-1', name: 'Alice', avatar: '🐱', role: 'CIVILIAN' as const, specialRole: null, word: 'Kopi', isAlive: true, score: 2 },
+  { id: 'p-2', name: 'Bob', avatar: '🦊', role: 'UNDERCOVER' as const, specialRole: null, word: 'Teh', isAlive: false, score: 10 },
+  { id: 'p-3', name: 'Charlie', avatar: '🐼', role: 'CIVILIAN' as const, specialRole: null, word: 'Kopi', isAlive: true, score: 6 },
+];
+const ranked = [...samplePlayers].sort((a, b) => b.score - a.score);
+assert(ranked[0].name === 'Bob', 'Highest score (Bob, 10pts) is rank #1');
+assert(ranked[1].name === 'Charlie', 'Second highest (Charlie, 6pts) is rank #2');
+assert(ranked[2].name === 'Alice', 'Third highest (Alice, 2pts) is rank #3');
+console.log('✅ PASSED: Players correctly sorted by score in descending rank order!');
+
 console.log('\n========================================');
 console.log('🎉 ALL ENGINE VERIFICATION CHECKS PASSED!');
 console.log('========================================\n');

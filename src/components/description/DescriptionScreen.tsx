@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { Player } from '../../types/game';
+import type { Player, PlayerProfile } from '../../types/game';
 import { 
   LogOut, 
   Menu, 
@@ -16,7 +16,8 @@ import {
   Music, 
   Check, 
   X,
-  Lock
+  Lock,
+  Trophy
 } from 'lucide-react';
 import { InfiltratorHat } from '../common/UndercoverIcons';
 import { soundEffects, triggerHaptic } from '../../utils/audio';
@@ -24,6 +25,7 @@ import { soundEffects, triggerHaptic } from '../../utils/audio';
 interface DescriptionScreenProps {
   round: number;
   players: Player[];
+  profiles?: PlayerProfile[];
   speechOrderIds: string[];
   undercoverCount: number;
   mrWhiteCount: number;
@@ -50,6 +52,7 @@ const CIRCLE_COLORS = [
 export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
   round: _round,
   players,
+  profiles = [],
   speechOrderIds,
   undercoverCount: _undercoverCount,
   mrWhiteCount: _mrWhiteCount,
@@ -570,63 +573,126 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
         </div>
       )}
 
-      {/* ================= SUB-MODAL 3: DAFTAR PEMAIN ================= */}
-      {activeSubModal === 'PLAYERS' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="papan-glass-dark rounded-3xl p-6 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-700/60">
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-amber-400" />
-                <h3 className="text-lg font-black text-white font-heading">Daftar Pemain ({players.length})</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveSubModal(null)}
-                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* ================= SUB-MODAL 3: DAFTAR PEMAIN & PERINGKAT ================= */}
+      {activeSubModal === 'PLAYERS' && (() => {
+        // Sort players by score descending to determine rankings
+        const rankedPlayers = [...players].map(p => {
+          const prof = profiles?.find(pr => pr.id === p.id);
+          const score = (prof?.totalScore !== undefined && prof.totalScore > 0) ? prof.totalScore : (p.score ?? 0);
+          return { ...p, score };
+        }).sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          if (a.isAlive !== b.isAlive) return a.isAlive ? -1 : 1;
+          return a.name.localeCompare(b.name);
+        });
 
-            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-              {players.map((p, idx) => (
-                <div
-                  key={p.id}
-                  className={`flex items-center justify-between p-3 rounded-2xl border ${
-                    p.isAlive
-                      ? 'bg-slate-900/80 border-slate-800 text-white'
-                      : 'bg-slate-950/40 border-slate-900 text-slate-500 opacity-60'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-slate-400 w-5">{idx + 1}.</span>
-                    {p.avatarImage ? (
-                      <img src={p.avatarImage} alt={p.name} className="w-8 h-8 rounded-full object-cover" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold text-white font-heading">
-                        {(p.name.trim() || `P${idx + 1}`).charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <span className="text-sm font-semibold">{p.name.trim() || `Pemain ${idx + 1}`}</span>
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+            <div className="papan-glass-dark rounded-3xl p-5 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                    <Trophy className="w-5 h-5" />
                   </div>
-
                   <div>
-                    {p.isAlive ? (
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                        Hidup
-                      </span>
-                    ) : (
-                      <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30">
-                        Keluar
-                      </span>
-                    )}
+                    <h3 className="text-base font-black text-white font-heading">
+                      Peringkat Pemain ({players.length})
+                    </h3>
+                    <p className="text-[11px] text-slate-400">
+                      Berdasarkan perolehan skor tertinggi
+                    </p>
                   </div>
                 </div>
-              ))}
+                <button
+                  type="button"
+                  onClick={() => setActiveSubModal(null)}
+                  className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center btn-tactile"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                {rankedPlayers.map((p, idx) => {
+                  const rank = idx + 1;
+                  return (
+                    <div
+                      key={p.id}
+                      className={`flex items-center justify-between p-3 rounded-2xl border transition-all ${
+                        rank === 1
+                          ? 'papan-glass border-amber-400/50 shadow-sm'
+                          : rank === 2
+                          ? 'papan-glass border-slate-300/40'
+                          : rank === 3
+                          ? 'papan-glass border-amber-700/40'
+                          : 'papan-glass border-white/5'
+                      } ${!p.isAlive ? 'opacity-65' : ''}`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {/* Rank Badge */}
+                        <div className="shrink-0 flex items-center justify-center">
+                          {rank === 1 ? (
+                            <div className="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-400 text-amber-300 flex items-center justify-center font-black text-xs font-heading">
+                              #1
+                            </div>
+                          ) : rank === 2 ? (
+                            <div className="w-7 h-7 rounded-full bg-slate-300/20 border border-slate-300 text-slate-200 flex items-center justify-center font-black text-xs font-heading">
+                              #2
+                            </div>
+                          ) : rank === 3 ? (
+                            <div className="w-7 h-7 rounded-full bg-amber-700/20 border border-amber-600 text-amber-400 flex items-center justify-center font-black text-xs font-heading">
+                              #3
+                            </div>
+                          ) : (
+                            <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs font-heading">
+                              #{rank}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Avatar */}
+                        {p.avatarImage ? (
+                          <img src={p.avatarImage} alt={p.name} className="w-8 h-8 rounded-full object-cover shrink-0 border border-white/10" />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-slate-700 border border-white/10 flex items-center justify-center text-xs font-bold text-white font-heading shrink-0">
+                            {(p.name.trim() || `P${rank}`).charAt(0).toUpperCase()}
+                          </div>
+                        )}
+
+                        {/* Name & Status */}
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-white font-heading truncate">
+                            {p.name.trim() || `Pemain ${rank}`}
+                          </p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            {p.isAlive ? (
+                              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300">
+                                Hidup
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300">
+                                Tersingkir
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Score on Right */}
+                      <div className="text-right shrink-0 pl-2">
+                        <span className="text-base font-black text-amber-400 font-heading">
+                          {p.score}
+                        </span>
+                        <span className="text-[11px] text-slate-400 ml-1 font-heading">pts</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ================= SUB-MODAL 4: PENGATURAN ================= */}
       {activeSubModal === 'SETTINGS' && (
