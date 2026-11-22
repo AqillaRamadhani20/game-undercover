@@ -36,7 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-slate-800 bg-slate-900 shadow-sm">
+    <header className="sticky top-0 z-40 w-full border-b border-white/10 papan-glass-dark shadow-sm">
       <div className="max-w-md mx-auto px-4 h-13 flex items-center justify-between">
         {/* Brand & Round Status */}
         <div className="flex items-center gap-2.5">

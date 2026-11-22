@@ -30,6 +30,7 @@ import { MrWhiteGuessModal } from './components/voting/MrWhiteGuessModal';
 import { RevengerChoiceModal } from './components/voting/RevengerChoiceModal';
 import { RoundResultScreen } from './components/result/RoundResultScreen';
 import { GameOverScreen } from './components/result/GameOverScreen';
+import { UndercoverBackground } from './components/common/UndercoverBackground';
 import { specialRoleHooks } from './engine/specialRoleHooks';
 
 export function App() {
@@ -94,7 +95,9 @@ export function App() {
     state.phase !== 'DESCRIPTION';
 
   return (
-    <div className="min-h-screen bg-[#0C0B1E] text-white flex flex-col font-sans selection:bg-cyan-500 selection:text-white">
+    <div className="min-h-screen bg-[#070B16] text-white flex flex-col font-sans selection:bg-cyan-500 selection:text-white relative overflow-x-hidden">
+      {/* Atmospheric Undercover Nocturnal Background with reduced opacity */}
+      <UndercoverBackground opacity={0.38} />
       {/* Universal Header (only in phases where integrated header isn't used) */}
       {showUniversalHeader && (
         <Header

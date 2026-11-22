@@ -208,8 +208,8 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
           </div>
         </div>
 
-        {/* ================= CARD 1: ROLE COMPOSITION (Solid Card) ================= */}
-        <div className="bg-[#E2E8F0] text-slate-800 rounded-3xl p-5 shadow-lg space-y-3.5">
+        {/* ================= CARD 1: ROLE COMPOSITION (Translucent Frosted Card) ================= */}
+        <div className="papan-glass-light text-slate-800 rounded-3xl p-5 shadow-xl space-y-3.5">
           {/* Civilian Pill */}
           <div className="flex justify-center">
             <span className="px-6 py-2 rounded-full bg-sky-600 text-white font-extrabold text-sm shadow-xs tracking-wide">
@@ -295,13 +295,13 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
           )}
         </div>
 
-        {/* ================= CARD 2: KATA-KATA (Solid Capsule) ================= */}
+        {/* ================= CARD 2: KATA-KATA (Translucent Frosted Capsule) ================= */}
         <div 
           onClick={() => {
             soundEffects.playPop();
             setIsCategoriesModalOpen(true);
           }}
-          className="bg-[#E2E8F0] rounded-2xl py-3 px-6 text-center shadow-md cursor-pointer hover:bg-slate-200 max-w-[200px] mx-auto btn-tactile"
+          className="papan-glass-light rounded-2xl py-3 px-6 text-center shadow-lg cursor-pointer hover:brightness-105 max-w-[200px] mx-auto btn-tactile"
         >
           <p className="text-[11px] font-semibold text-slate-500">
             Kata-kata

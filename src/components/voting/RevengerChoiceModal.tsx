@@ -75,7 +75,7 @@ export const RevengerChoiceModal: React.FC<RevengerChoiceModalProps> = ({
           type="button"
           onClick={handleConfirm}
           disabled={!selectedTargetId}
-          className="w-full py-3.5 rounded-full bg-gradient-to-r from-rose-500 to-red-600 text-white font-black text-sm shadow-lg shadow-rose-500/25 hover:brightness-105 active:scale-95 transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+          className="w-full py-4 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-black text-sm shadow-lg transition-all disabled:opacity-40 flex items-center justify-center gap-2 btn-tactile font-heading"
         >
           <Skull className="w-4 h-4" />
           <span>Seret Pemain Ini ke Eliminasi!</span>

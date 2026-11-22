@@ -71,7 +71,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
       </div>
 
       {/* Mode Switcher */}
-      <div className="flex p-1 rounded-full bg-slate-900 border border-slate-700 max-w-xs mx-auto my-3 font-heading">
+      <div className="flex p-1 rounded-full papan-glass max-w-xs mx-auto my-3 font-heading">
         <button
           type="button"
           onClick={() => {
@@ -116,8 +116,8 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                   key={p.id}
                   onClick={() => handleSelectQuick(p.id)}
                   className={`p-3 rounded-2xl border-2 cursor-pointer flex items-center gap-3 btn-tactile shadow-sm ${isSelected
-                    ? 'bg-rose-600/20 border-rose-500 shadow-rose-500/10'
-                    : 'bg-slate-800 border-slate-700 hover:border-slate-600'
+                    ? 'bg-rose-600/25 border-rose-500 shadow-rose-500/10'
+                    : 'papan-glass hover:bg-slate-800/80'
                     }`}
                 >
                   {/* Avatar / Photo Thumbnail */}
@@ -213,15 +213,15 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
           </div>
 
           {/* Live Vote Tally Results */}
-          <div className="p-3.5 rounded-2xl bg-slate-800 border border-slate-700 space-y-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          <div className="p-3.5 rounded-2xl papan-glass space-y-2">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-heading">
               Rekap Suara Masuk:
             </h4>
             <div className="grid grid-cols-2 gap-2">
               {alivePlayers.map(p => (
                 <div
                   key={p.id}
-                  className="p-2 rounded-xl bg-slate-900 flex items-center justify-between"
+                  className="p-2 rounded-xl papan-glass-dark flex items-center justify-between"
                 >
                   <span className="text-xs font-semibold text-white truncate font-heading">
                     {p.name.trim() || `Pemain ${alivePlayers.indexOf(p) + 1}`}
@@ -236,8 +236,8 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
         </div>
       )}
 
-      {/* Bottom Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-900 border-t border-slate-800 z-30">
+      {/* Bottom Sticky Action Bar (Translucent Frosted Glass) */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 papan-glass-dark border-t border-slate-800/80 z-30">
         <div className="max-w-md mx-auto">
           <button
             type="button"

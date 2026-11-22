@@ -31,18 +31,18 @@ export const RoundResultScreen: React.FC<RoundResultScreenProps> = ({
     <div className="min-h-screen undercover-solid-bg flex flex-col justify-between max-w-md mx-auto px-5 py-5 select-none relative z-10 pb-28">
       {/* Header */}
       <div className="text-center space-y-1">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs font-bold uppercase tracking-wider text-slate-300">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full papan-glass text-xs font-bold uppercase tracking-wider text-slate-300 font-heading">
           Hasil Akhir Ronde {round}
         </div>
-        <h2 className="text-xl font-black text-white mt-1">
+        <h2 className="text-xl font-black text-white mt-1 font-heading">
           Identitas Pemain Tereliminasi
         </h2>
       </div>
 
-      {/* Primary Eliminated Player Card */}
+      {/* Primary Eliminated Player Card (Frosted Glass Papan) */}
       {eliminatedPlayer && (
-        <div className="p-6 rounded-3xl bg-slate-900 border-2 border-slate-700 shadow-xl text-center space-y-4 animate-scale-up my-3">
-          <div className="w-20 h-20 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center text-4xl shadow-inner mx-auto overflow-hidden">
+        <div className="p-6 rounded-3xl papan-glass shadow-xl text-center space-y-4 animate-scale-up my-3">
+          <div className="w-20 h-20 rounded-full bg-slate-800 border-2 border-white/10 flex items-center justify-center text-4xl shadow-inner mx-auto overflow-hidden">
             {eliminatedPlayer.avatarImage ? (
               <img src={eliminatedPlayer.avatarImage} alt={eliminatedPlayer.name} className="w-full h-full object-cover" />
             ) : (
@@ -60,12 +60,12 @@ export const RoundResultScreen: React.FC<RoundResultScreenProps> = ({
           </div>
 
           {/* Role Reveal Banner */}
-          <div className={`p-4 rounded-2xl border text-sm font-bold flex items-center justify-center gap-2 font-heading ${
+          <div className={`p-4 rounded-2xl papan-glass-dark border text-sm font-bold flex items-center justify-center gap-2 font-heading ${
             eliminatedPlayer.role === 'CIVILIAN'
-              ? 'bg-slate-800 border-slate-700 text-slate-200'
+              ? 'border-slate-700 text-slate-200'
               : eliminatedPlayer.role === 'UNDERCOVER'
-              ? 'bg-slate-800 border-amber-600/60 text-amber-300'
-              : 'bg-slate-800 border-sky-600/60 text-sky-300'
+              ? 'border-amber-600/60 text-amber-300'
+              : 'border-sky-600/60 text-sky-300'
           }`}>
             <span>
               Peran: {formatRoleName(eliminatedPlayer.role)}
@@ -93,17 +93,17 @@ export const RoundResultScreen: React.FC<RoundResultScreenProps> = ({
       )}
 
       {/* Survivor Status Bar */}
-      <div className="p-3 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-between text-xs text-slate-300">
-        <span className="flex items-center gap-1.5 font-bold">
+      <div className="p-3 rounded-2xl papan-glass flex items-center justify-between text-xs text-slate-300">
+        <span className="flex items-center gap-1.5 font-bold font-heading">
           <Users className="w-4 h-4 text-sky-400" /> Pemain Bertahan: {alivePlayers.length}
         </span>
-        <span className="text-slate-400">
+        <span className="text-slate-400 font-heading">
           Tersingkir: {deadPlayers.length}
         </span>
       </div>
 
       {/* Bottom Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-900 border-t border-slate-800 z-30">
+      <div className="fixed bottom-0 left-0 right-0 p-4 papan-glass-dark border-t border-white/10 z-30">
         <div className="max-w-md mx-auto">
           <button
             type="button"

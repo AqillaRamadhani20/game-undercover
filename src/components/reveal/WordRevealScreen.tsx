@@ -180,11 +180,11 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
         </button>
       </div>
 
-      {/* ================= INFO PILLS BAR (Screenshot 2) ================= */}
+      {/* ================= INFO PILLS BAR (Screenshot 2 - Frosted Glass) ================= */}
       <div className="flex items-center justify-between gap-3 mt-4">
         {/* Left Pill: Penyusup tersisa */}
-        <div className="flex-1 bg-slate-900 border border-slate-700 rounded-2xl py-2 px-3.5 shadow-sm">
-          <p className="text-[11px] font-semibold text-slate-400">
+        <div className="flex-1 papan-glass rounded-2xl py-2 px-3.5 shadow-md">
+          <p className="text-[11px] font-semibold text-slate-300">
             Penyusup tersisa
           </p>
           <div className="flex items-center gap-3 mt-0.5">
@@ -202,8 +202,8 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
         </div>
 
         {/* Right Pill: Peran Khusus */}
-        <div className="flex-1 bg-slate-900 border border-slate-700 rounded-2xl py-2 px-3.5 shadow-sm text-left">
-          <p className="text-[11px] font-semibold text-slate-400">
+        <div className="flex-1 papan-glass rounded-2xl py-2 px-3.5 shadow-md text-left">
+          <p className="text-[11px] font-semibold text-slate-300">
             Peran Khusus
           </p>
           <p className="text-xs font-black text-slate-300 truncate mt-0.5 font-heading">
@@ -284,10 +284,10 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
 
       {/* ================= GAME MENU MODAL ================= */}
       {isMenuOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-fade-in">
-          <div className="w-full max-w-sm rounded-3xl bg-slate-900 border-2 border-slate-700 p-5 shadow-2xl space-y-4 animate-scale-up">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-sm rounded-3xl papan-glass-dark border border-white/10 p-5 shadow-2xl space-y-4 animate-scale-up">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-base font-black text-white">Menu Permainan</h3>
+              <h3 className="text-base font-black text-white font-heading">Menu Permainan</h3>
               <button
                 type="button"
                 onClick={() => setIsMenuOpen(false)}
@@ -363,10 +363,10 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
         </div>
       )}
 
-      {/* ================= CARD SELECTION / REVEAL MODAL (Screenshot 3 Style) ================= */}
+      {/* ================= CARD SELECTION / REVEAL MODAL (Screenshot 3 Style - Frosted Glass) ================= */}
       {isCardModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs animate-fade-in">
-          <div className="w-full max-w-sm rounded-3xl bg-slate-900 border-2 border-slate-700 p-6 shadow-2xl space-y-5 text-center animate-scale-up">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-sm rounded-3xl papan-glass-dark p-6 shadow-2xl space-y-5 text-center animate-scale-up">
             
             {/* Center Circular Green Avatar with Photo & Camera Upload Button */}
             <div className="relative inline-block mx-auto">
@@ -513,7 +513,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
               /* STAGE 2: Secret Word Revealed */
               <div className="space-y-4 animate-flip">
                 {player.role === 'MR_WHITE' ? (
-                  <div className="p-5 rounded-2xl bg-slate-900 border border-slate-700 text-center space-y-2">
+                  <div className="p-5 rounded-2xl papan-glass text-center space-y-2">
                     <InfiltratorHat isWhite={true} className="w-10 h-10 mx-auto filter drop-shadow-sm" />
                     <h3 className="text-xl font-black text-white font-heading">
                       Kamu adalah MR. WHITE
@@ -523,7 +523,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                     </p>
                   </div>
                 ) : (
-                  <div className="p-5 rounded-2xl bg-slate-900 border border-slate-700 text-center space-y-1">
+                  <div className="p-5 rounded-2xl papan-glass text-center space-y-1">
                     <p className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider font-heading">
                       Kata Rahasiamu:
                     </p>

@@ -86,8 +86,8 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
 
   return (
     <div className="min-h-screen undercover-solid-bg flex flex-col justify-between max-w-md mx-auto px-5 py-5 select-none relative z-10 pb-28">
-      {/* Victory Banner */}
-      <div className="p-6 rounded-3xl bg-slate-900 border-2 border-slate-700 shadow-2xl text-center space-y-3 animate-scale-up my-3">
+      {/* Victory Banner (Frosted Glass Papan) */}
+      <div className="p-6 rounded-3xl papan-glass shadow-2xl text-center space-y-3 animate-scale-up my-3">
         <div className="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mx-auto shadow-sm">
           <Trophy className="w-8 h-8 stroke-[2.2]" />
         </div>
@@ -103,7 +103,7 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
 
         {/* Word Pair Reveal */}
         {activeWordPair && (
-          <div className="p-4 rounded-2xl bg-slate-800 border border-slate-700 text-left space-y-2 mt-2">
+          <div className="p-4 rounded-2xl papan-glass-dark text-left space-y-2 mt-2">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 font-heading">
               Kata Rahasia ({activeWordPair.category}):
             </p>
@@ -133,7 +133,7 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
             return (
               <div
                 key={p.id}
-                className="p-3 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-between shadow-sm"
+                className="p-3 rounded-2xl papan-glass flex items-center justify-between shadow-sm"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-lg overflow-hidden shrink-0">
@@ -172,8 +172,8 @@ export const GameOverScreen: React.FC<GameOverScreenProps> = ({
         </div>
       </div>
 
-      {/* Bottom Sticky Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-900 border-t border-slate-800 z-30">
+      {/* Bottom Sticky Action Bar (Frosted Glass) */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 papan-glass-dark border-t border-white/10 z-30">
         <div className="max-w-md mx-auto flex gap-2.5">
           <button
             type="button"

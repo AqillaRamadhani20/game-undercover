@@ -33,7 +33,7 @@ export const Modal: React.FC<ModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
       <div 
-        className={`w-full ${maxWidth} bg-slate-900/95 border-2 border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-scale-up text-white`}
+        className={`w-full ${maxWidth} papan-glass-dark border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-scale-up text-white`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

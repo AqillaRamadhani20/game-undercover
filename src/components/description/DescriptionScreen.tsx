@@ -202,11 +202,11 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
           Jelaskan kata rahasiamu dalam urutan yang ditunjukkan, hanya menggunakan kata atau frasa.
         </p>
 
-        {/* ================= HUD ROW ================= */}
+        {/* ================= HUD ROW (Frosted Glass with Reduced Opacity) ================= */}
         <div className="flex items-center justify-center gap-3 pt-1">
           {/* Card 1: Penyusup tersisa */}
-          <div className="bg-[#1E293B] border border-slate-700/80 rounded-2xl px-5 py-2 flex flex-col items-center shadow-md min-w-[130px]">
-            <span className="text-[11px] font-semibold text-slate-400 mb-1">
+          <div className="papan-glass rounded-2xl px-5 py-2 flex flex-col items-center min-w-[130px]">
+            <span className="text-[11px] font-semibold text-slate-300 mb-1">
               Penyusup tersisa
             </span>
             <div className="flex items-center gap-3">
@@ -228,8 +228,8 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
           </div>
 
           {/* Card 2: Peran Khusus */}
-          <div className="bg-[#1E293B] border border-slate-700/80 rounded-2xl px-5 py-2 flex flex-col items-center shadow-md min-w-[130px]">
-            <span className="text-[11px] font-semibold text-slate-400 mb-1">
+          <div className="papan-glass rounded-2xl px-5 py-2 flex flex-col items-center min-w-[130px]">
+            <span className="text-[11px] font-semibold text-slate-300 mb-1">
               Peran Khusus
             </span>
             <span className="text-sm font-bold text-slate-300 font-heading">
@@ -270,8 +270,8 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
                   </div>
                 </div>
 
-                {/* Name Capsule Pill */}
-                <div className="bg-[#334155] border border-slate-600 rounded-lg px-2.5 py-1 max-w-[95px] text-center shadow-xs mt-2">
+                {/* Name Capsule Pill (Translucent Frosted Pill) */}
+                <div className="papan-glass rounded-lg px-2.5 py-1 max-w-[95px] text-center shadow-xs mt-2">
                   <span className="text-xs font-bold text-slate-100 block truncate">
                     {displayName}
                   </span>
@@ -315,8 +315,8 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
             className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 transition-opacity"
           />
 
-          {/* Sheet Container matching Screenshot */}
-          <div className="fixed bottom-4 left-4 right-4 max-w-md mx-auto bg-[#1E2438] border border-slate-700/90 rounded-3xl p-5 shadow-2xl z-50 animate-scale-up space-y-2">
+          {/* Sheet Container (Translucent Frosted Glass) */}
+          <div className="fixed bottom-4 left-4 right-4 max-w-md mx-auto papan-glass-dark rounded-3xl p-5 shadow-2xl z-50 animate-scale-up space-y-2">
             {/* 1. Timer */}
             <button
               type="button"
@@ -398,7 +398,7 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
       {/* ================= SUB-MODAL 1: TIMER ================= */}
       {activeSubModal === 'TIMER' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="bg-[#1E2438] border border-slate-700 rounded-3xl p-6 max-w-sm w-full space-y-5 animate-scale-up shadow-2xl text-center">
+          <div className="papan-glass-dark rounded-3xl p-6 max-w-sm w-full space-y-5 animate-scale-up shadow-2xl text-center">
             <div className="flex items-center justify-between pb-2 border-b border-slate-700/60">
               <div className="flex items-center gap-2">
                 <Timer className="w-5 h-5 text-emerald-400" />
@@ -490,7 +490,7 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
       {/* ================= SUB-MODAL 2: AMNESIC MODE ================= */}
       {activeSubModal === 'AMNESIC' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="bg-[#1E2438] border border-slate-700 rounded-3xl p-6 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl">
+          <div className="papan-glass-dark rounded-3xl p-6 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl">
             <div className="flex items-center justify-between pb-2 border-b border-slate-700/60">
               <div className="flex items-center gap-2">
                 <Eye className="w-5 h-5 text-sky-400" />
@@ -573,7 +573,7 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
       {/* ================= SUB-MODAL 3: DAFTAR PEMAIN ================= */}
       {activeSubModal === 'PLAYERS' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="bg-[#1E2438] border border-slate-700 rounded-3xl p-6 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl">
+          <div className="papan-glass-dark rounded-3xl p-6 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl">
             <div className="flex items-center justify-between pb-2 border-b border-slate-700/60">
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-amber-400" />
@@ -631,7 +631,7 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
       {/* ================= SUB-MODAL 4: PENGATURAN ================= */}
       {activeSubModal === 'SETTINGS' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs">
-          <div className="bg-[#1E2438] border border-slate-700 rounded-3xl p-6 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl">
+          <div className="papan-glass-dark rounded-3xl p-6 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl">
             <div className="flex items-center justify-between pb-2 border-b border-slate-700/60">
               <div className="flex items-center gap-2">
                 <Settings className="w-5 h-5 text-pink-400" />
