@@ -28,6 +28,7 @@ interface WordRevealScreenProps {
   mrWhiteCount: number;
   activeSpecialRoles: string[];
   savedProfiles?: PlayerProfile[];
+  isReplay?: boolean;
   onRevealCard: () => void;
   onHideAndNext: () => void;
   onReturnToLobby: () => void;
@@ -52,11 +53,12 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
   totalPlayers,
   allPlayers,
   isCardRevealed: propIsCardRevealed,
-  partnerPlayer,
+  partnerPlayer: _partnerPlayer, // Lovers partner text removed per user request
   undercoverCount,
   mrWhiteCount,
   activeSpecialRoles: _activeSpecialRoles,
   savedProfiles,
+  isReplay = false,
   onRevealCard,
   onHideAndNext,
   onReturnToLobby,
@@ -99,7 +101,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     }
   }, [playerIndex]);
 
-  // Whenever turn changes to the next player, show the handover prompt modal! (Images 1 & 5)
+  // When turn changes to next player:
   useEffect(() => {
     setShowHandoverModal(true);
     setIsCardModalOpen(false);
@@ -109,9 +111,10 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     setModalAvatarImage(undefined);
   }, [playerIndex]);
 
-  // Determine current picker's known identity (from saved profiles or previous games)
-  const currentPickerProfile = savedProfiles?.[playerIndex];
-  const pickerName = currentPickerProfile?.name?.trim() || allPlayers?.[playerIndex]?.name?.trim() || '';
+  // Existing name in Replay ("Main Lagi") mode
+  const existingReplayName = isReplay 
+    ? (allPlayers?.[playerIndex]?.name?.trim() || savedProfiles?.[playerIndex]?.name?.trim() || '')
+    : '';
 
   const cardCount = totalPlayers;
 
@@ -134,12 +137,21 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     soundEffects.playCardFlip();
     triggerHaptic('light');
     setSelectedCardIdx(idx);
-    setIsWordRevealedInModal(false);
-    
-    // Prefill with known pickerName if available, else start empty
-    setPlayerNameInput(pickerName);
-    setModalAvatarImage(currentPickerProfile?.avatarImage);
-    setIsCardModalOpen(true);
+
+    if (isReplay && existingReplayName) {
+      // MAIN LAGI: Pemain sudah memiliki nama, langsung buka kartu rahasianya!
+      setPlayerNameInput(existingReplayName);
+      setModalAvatarImage(undefined);
+      setIsWordRevealedInModal(true);
+      setIsCardModalOpen(true);
+      onRevealCard();
+    } else {
+      // BARU START: Kolom nama wajib kosong dan harus diisi manual!
+      setPlayerNameInput('');
+      setModalAvatarImage(undefined);
+      setIsWordRevealedInModal(false);
+      setIsCardModalOpen(true);
+    }
   };
 
   // Submit name to open secret word (Image 3 -> Image 4)
@@ -158,13 +170,13 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     soundEffects.playPop();
     triggerHaptic('light');
     if (selectedCardIdx !== null) {
-      const chosenName = playerNameInput.trim() || pickerName || `Player ${playerIndex + 1}`;
-      const chosenAvatar = currentPickerProfile?.avatar || '👤';
-      const chosenAvatarImage = modalAvatarImage || currentPickerProfile?.avatarImage;
-      const chosenId = currentPickerProfile?.id;
-      const chosenScore = currentPickerProfile?.totalScore ?? 0;
+      const chosenName = playerNameInput.trim() || existingReplayName || `Player ${playerIndex + 1}`;
+      const chosenAvatar = allPlayers?.[playerIndex]?.avatar || savedProfiles?.[playerIndex]?.avatar || '👤';
+      const chosenAvatarImage = modalAvatarImage;
+      const chosenId = allPlayers?.[playerIndex]?.id || savedProfiles?.[playerIndex]?.id;
+      const chosenScore = allPlayers?.[playerIndex]?.score ?? savedProfiles?.[playerIndex]?.totalScore ?? 0;
 
-      // Update local claimed cards display on the table
+      // Update local claimed cards display on table
       setClaimedCardsMap(prev => ({
         ...prev,
         [selectedCardIdx]: {
@@ -193,6 +205,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     setSelectedCardIdx(null);
     setIsWordRevealedInModal(false);
     setModalAvatarImage(undefined);
+    setPlayerNameInput('');
   };
 
   const handleTriggerReroll = () => {
@@ -231,18 +244,12 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     }
   };
 
-  // Check if typed name already belongs to another player (prevent exact duplicate names)
+  // Only check duplicate against players who have ALREADY claimed a card in this round!
   const trimmedLowerInput = playerNameInput.trim().toLowerCase();
   const isDuplicateName = Boolean(
     trimmedLowerInput && (
       Object.entries(claimedCardsMap).some(
         ([cIdx, val]) => Number(cIdx) !== selectedCardIdx && val.name.trim().toLowerCase() === trimmedLowerInput
-      ) ||
-      allPlayers?.some(
-        (p, idx) => idx !== selectedCardIdx && p.name.trim().toLowerCase() === trimmedLowerInput
-      ) ||
-      savedProfiles?.some(
-        (p, idx) => idx !== playerIndex && p.name.trim().toLowerCase() === trimmedLowerInput
       )
     )
   );
@@ -283,7 +290,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-cyan-950/90 border border-cyan-400/50 text-cyan-300 shadow-md mb-0.5">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
             <span className="text-xs font-black uppercase tracking-wider font-heading">
-              Player {playerIndex + 1}{pickerName ? ` (${pickerName})` : ''}
+              Player {playerIndex + 1}{existingReplayName ? ` (${existingReplayName})` : ''}
             </span>
           </div>
           <p className="text-[11px] font-bold text-slate-300">
@@ -299,7 +306,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
             onOpenRulebook();
           }}
           aria-label="Bantuan"
-          className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-black text-sm flex items-center justify-center shadow-md btn-tactile"
+          className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-black text-sm flex items-center justify-center shadow-md border border-blue-400/40 btn-tactile"
         >
           ?
         </button>
@@ -481,10 +488,10 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
       {showHandoverModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
           <div className="w-full max-w-xs rounded-3xl papan-glass-dark border border-white/20 p-6 shadow-2xl text-center space-y-4 animate-scale-up">
-            {/* Header: Player X in cyan bold, Subtitle: Pilih kartu */}
+            {/* Header: Player X (Name if Replay) */}
             <div className="space-y-1">
               <h3 className="text-2xl font-black text-[#2DD4BF] font-heading tracking-wide">
-                Player {playerIndex + 1}
+                Player {playerIndex + 1}{existingReplayName ? ` (${existingReplayName})` : ''}
               </h3>
               <p className="text-white text-sm font-semibold">
                 Pilih kartu
@@ -564,7 +571,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                   )}
                 </div>
 
-                {/* Input Container */}
+                {/* Input Container: Starts completely EMPTY on fresh start! */}
                 <div className="space-y-2">
                   <input
                     type="text"
@@ -639,7 +646,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                     />
                   ) : (
                     <span className="font-heading font-black text-4xl text-white">
-                      {(playerNameInput.trim() || `${playerIndex + 1}`).charAt(0).toUpperCase()}
+                      {(playerNameInput.trim() || existingReplayName || `${playerIndex + 1}`).charAt(0).toUpperCase()}
                     </span>
                   )}
                 </div>
@@ -647,7 +654,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                 {/* Player Name in bold cyan & Subtitle */}
                 <div className="space-y-0.5">
                   <h3 className="text-xl font-black text-[#2DD4BF] font-heading tracking-wide">
-                    {playerNameInput.trim()}
+                    {playerNameInput.trim() || existingReplayName}
                   </h3>
                   <p className="text-slate-300 text-xs font-semibold">
                     Kata rahasiamu adalah
@@ -670,11 +677,6 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                       <span className="text-2xl font-black text-slate-900 font-heading tracking-wider block uppercase">
                         {activeChosenPlayer.word}
                       </span>
-                      {partnerPlayer && (
-                        <p className="text-[11px] text-rose-500 font-bold pt-1">
-                          ❤️ Pasangan Lovers: {partnerPlayer.name}
-                        </p>
-                      )}
                     </div>
                   )}
                 </div>

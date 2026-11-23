@@ -94,6 +94,7 @@ export interface GameState {
   firstEliminatedInGameId: string | null;
   memeCursePlayerId: string | null;
   historyLog: string[];
+  isReplay?: boolean;
 }
 
 export interface PlayerProfile {

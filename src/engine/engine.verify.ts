@@ -235,6 +235,7 @@ assert(replayState.phase === 'WORD_REVEAL', 'Replay directly enters WORD_REVEAL'
 assert(replayState.players[0].name === 'Player 1', 'Player names preserved');
 assert(replayState.players[0].avatarImage === undefined, 'Custom avatarImage is cleared on replay as requested');
 assert(replayState.revealIndex === 0, 'Card reveal index ready at Player 1');
+assert(replayState.isReplay === true, 'Replay state has isReplay = true');
 console.log('✅ PASSED: Replay game keeps names and clears avatar image cleanly!');
 
 // 8. Player List Ranking by Score

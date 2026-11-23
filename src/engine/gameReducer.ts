@@ -88,6 +88,7 @@ export const INITIAL_STATE: GameState = {
   firstEliminatedInGameId: null,
   memeCursePlayerId: null,
   historyLog: [],
+  isReplay: false,
 };
 
 /**
@@ -151,6 +152,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         usedWordPairIds: updatedUsedIds,
         revealIndex: 0,
         isCardRevealed: false,
+        isReplay: false,
         historyLog: [`Game dimulai! Ronde 1 dengan ${players.length} pemain.`],
       };
     }
@@ -685,6 +687,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           category: pair.category,
         },
         usedWordPairIds: [...state.usedWordPairIds, pair.id],
+        isReplay: true,
         historyLog: ['Game baru dimulai! Langsung buka kartu masing-masing tanpa perlu input ulang nama.'],
       };
     }

@@ -110,8 +110,8 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#070B16] text-white flex flex-col font-sans selection:bg-cyan-500 selection:text-white relative overflow-x-hidden">
-      {/* Atmospheric Undercover Nocturnal Background with reduced opacity */}
-      <UndercoverBackground opacity={0.38} />
+      {/* Atmospheric Undercover Nocturnal Background with vibrant depth */}
+      <UndercoverBackground opacity={0.48} />
       {/* Universal Header (only in phases where integrated header isn't used) */}
       {showUniversalHeader && (
         <Header
@@ -162,6 +162,7 @@ export function App() {
             mrWhiteCount={state.config.mrWhiteCount}
             activeSpecialRoles={state.config.enabledSpecialRoles}
             savedProfiles={profiles}
+            isReplay={state.isReplay ?? false}
             partnerPlayer={
               state.players[state.revealIndex]?.loverPartnerId
                 ? state.players.find(p => p.id === state.players[state.revealIndex].loverPartnerId)
