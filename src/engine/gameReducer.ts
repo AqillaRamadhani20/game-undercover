@@ -617,7 +617,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         id: p.id,
         name: p.name,
         avatar: p.avatar,
-        avatarImage: p.avatarImage,
+        avatarImage: undefined, // Clear foto profil on replay so it resets cleanly
         score: p.score,
       }));
 

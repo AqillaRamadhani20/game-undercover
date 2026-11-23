@@ -32,7 +32,6 @@ import { RevengerChoiceModal } from './components/voting/RevengerChoiceModal';
 import { RoundResultScreen } from './components/result/RoundResultScreen';
 import { GameOverScreen } from './components/result/GameOverScreen';
 import { UndercoverBackground } from './components/common/UndercoverBackground';
-import { specialRoleHooks } from './engine/specialRoleHooks';
 
 export function App() {
   const [state, dispatch] = useReducer(gameReducer, INITIAL_STATE);
@@ -71,11 +70,11 @@ export function App() {
     }
   };
 
-  // Update a player's name by ID and keep profiles in sync
+  // Update a player's name by ID and keep profiles in sync (clears avatarImage when name changes)
   const handleUpdatePlayerNameById = (playerId: string, name: string) => {
     dispatch({ type: 'UPDATE_PLAYER_NAME_BY_ID', playerId, name });
     setProfiles(prev => {
-      const updated = prev.map(p => (p.id === playerId ? { ...p, name } : p));
+      const updated = prev.map(p => (p.id === playerId ? { ...p, name, avatarImage: undefined } : p));
       savePlayerProfiles(updated);
       return updated;
     });
@@ -102,12 +101,7 @@ export function App() {
     }
   }, [state.phase, state.winner, state.roundScoreDeltas]);
 
-  // Check Goddess presence for tie-breaker
-  const tieGoddessCheck = specialRoleHooks.onVoteTie({
-    players: state.players,
-    tiedPlayerIds: state.tiedPlayerIds,
-    enabledRoles: state.config.enabledSpecialRoles,
-  });
+
 
   const showUniversalHeader = 
     state.phase !== 'LOBBY' && 
@@ -316,8 +310,8 @@ export function App() {
         isOpen={state.phase === 'TIE_BREAKER'}
         tiedPlayerIds={state.tiedPlayerIds}
         players={state.players}
-        hasGoddess={tieGoddessCheck.hasGoddess}
-        goddessPlayer={tieGoddessCheck.goddessPlayer}
+        hasGoddess={false}
+        goddessPlayer={null}
         onResolveTie={(mode, chosenPlayerId) =>
           dispatch({ type: 'RESOLVE_TIE_BREAKER', mode, chosenPlayerId })
         }

@@ -205,7 +205,23 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     }
   };
 
-  const isNameValid = playerNameInput.trim().length > 0;
+  // Check if typed name already belongs to another player (prevent exact duplicate names)
+  const trimmedLowerInput = playerNameInput.trim().toLowerCase();
+  const isDuplicateName = Boolean(
+    trimmedLowerInput && (
+      Object.entries(claimedCardsMap).some(
+        ([cIdx, val]) => Number(cIdx) !== selectedCardIdx && val.name.trim().toLowerCase() === trimmedLowerInput
+      ) ||
+      allPlayers?.some(
+        (p, idx) => idx !== selectedCardIdx && p.name.trim().toLowerCase() === trimmedLowerInput
+      ) ||
+      savedProfiles?.some(
+        (p, idx) => idx !== playerIndex && p.name.trim().toLowerCase() === trimmedLowerInput
+      )
+    )
+  );
+
+  const isNameValid = playerNameInput.trim().length > 0 && !isDuplicateName;
   const isRevealed = isWordRevealedInModal || propIsCardRevealed;
 
   return (
@@ -300,15 +316,13 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
           </div>
         </div>
 
-        {/* Right Pill: Peran Khusus */}
+        {/* Right Pill: Total Pemain */}
         <div className="flex-1 papan-glass rounded-2xl py-2 px-3.5 shadow-md text-left">
           <p className="text-[11px] font-semibold text-slate-300">
-            Peran Khusus
+            Total Pemain
           </p>
-          <p className="text-xs font-black text-slate-300 truncate mt-0.5 font-heading">
-            {_activeSpecialRoles && _activeSpecialRoles.length > 0
-              ? _activeSpecialRoles.join(', ')
-              : 'Tidak ada'}
+          <p className="text-xs font-black text-cyan-300 truncate mt-0.5 font-heading">
+            {totalPlayers} Pemain
           </p>
         </div>
       </div>
@@ -586,35 +600,26 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                     <input
                       type="text"
                       value={playerNameInput}
-                      onChange={(e) => setPlayerNameInput(e.target.value)}
+                      onChange={(e) => {
+                        setPlayerNameInput(e.target.value);
+                        // Clear custom profile photo when name is changed
+                        setModalAvatarImage(undefined);
+                      }}
                       placeholder="Ketik namamu di sini..."
                       maxLength={16}
-                      className="w-full px-4 py-3 rounded-2xl bg-slate-900/90 border-2 border-slate-600 focus:border-cyan-400 text-white text-base font-bold text-center focus:outline-none font-heading shadow-inner placeholder:text-slate-500"
+                      className={`w-full px-4 py-3 rounded-2xl bg-slate-900/90 border-2 text-white text-base font-bold text-center focus:outline-none font-heading shadow-inner placeholder:text-slate-500 transition-colors ${
+                        isDuplicateName 
+                          ? 'border-rose-500 focus:border-rose-400' 
+                          : 'border-slate-600 focus:border-cyan-400'
+                      }`}
                     />
                     <p className="text-xs text-slate-300">
-                      Wajib isi nama sebelum membuka kata rahasia
+                      Wajib isi nama unik sebelum membuka kata rahasia
                     </p>
-                  </div>
-
-                  {/* Quick Famous Name Chips */}
-                  <div className="flex items-center justify-center gap-1.5 flex-wrap pt-1">
-                    {['Batman', 'Spiderman', 'Desta', 'Vincent', 'Raffi', 'Komeng', 'Thor', 'Zendaya'].map(chip => (
-                      <button
-                        key={chip}
-                        type="button"
-                        onClick={() => {
-                          soundEffects.playPop();
-                          setPlayerNameInput(chip);
-                        }}
-                        className="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[10px] font-bold text-amber-300 btn-tactile font-heading"
-                      >
-                        +{chip}
-                      </button>
-                    ))}
                   </div>
                 </div>
 
-                {/* Primary Button: STRICT VALIDATION - Disabled if name is empty */}
+                {/* Primary Button: STRICT VALIDATION - Disabled if name is empty or duplicate */}
                 <div className="space-y-2 pt-1">
                   <button
                     type="button"
@@ -630,9 +635,15 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                     <span>Lihat Kata Rahasia</span>
                   </button>
 
-                  {!isNameValid && (
+                  {!playerNameInput.trim() && (
                     <p className="text-[11px] font-bold text-amber-400 animate-pulse flex items-center justify-center gap-1">
                       ⚠️ Wajib masukkan nama untuk melihat kata rahasia
+                    </p>
+                  )}
+
+                  {isDuplicateName && (
+                    <p className="text-[11px] font-bold text-rose-400 animate-pulse flex items-center justify-center gap-1">
+                      ⚠️ Nama &quot;{playerNameInput.trim()}&quot; sudah digunakan pemain lain! Gunakan nama berbeda.
                     </p>
                   )}
                 </div>

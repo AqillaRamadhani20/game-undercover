@@ -233,9 +233,9 @@ console.log('\n[7. Replay Game Direct Flow (No Name Re-Entry)]');
 const replayState = gameReducer(stateFlow, { type: 'REPLAY_GAME' });
 assert(replayState.phase === 'WORD_REVEAL', 'Replay directly enters WORD_REVEAL');
 assert(replayState.players[0].name === 'Player 1', 'Player names preserved');
-assert(replayState.players[0].avatarImage === 'data:image/jpeg;base64,sampleBase64PhotoData', 'Custom avatarImage preserved across replay');
+assert(replayState.players[0].avatarImage === undefined, 'Custom avatarImage is cleared on replay as requested');
 assert(replayState.revealIndex === 0, 'Card reveal index ready at Player 1');
-console.log('✅ PASSED: Replay game keeps all profile images/names and immediately enters card choosing!');
+console.log('✅ PASSED: Replay game keeps names and clears avatar image cleanly!');
 
 // 8. Player List Ranking by Score
 console.log('\n[8. Player List Ranking by Score]');

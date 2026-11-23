@@ -1,15 +1,15 @@
 import React from 'react';
 import { Modal } from '../common/Modal';
 import type { Player } from '../../types/game';
-import { Scale, RotateCcw, Swords } from 'lucide-react';
+import { RotateCcw, Swords } from 'lucide-react';
 import { soundEffects, triggerHaptic } from '../../utils/audio';
 
 interface TieBreakerModalProps {
   isOpen: boolean;
   tiedPlayerIds: string[];
   players: Player[];
-  hasGoddess: boolean;
-  goddessPlayer: Player | null;
+  hasGoddess?: boolean;
+  goddessPlayer?: Player | null;
   onResolveTie: (mode: 'REVOTE' | 'SUIT' | 'GODDESS', chosenPlayerId?: string) => void;
 }
 
@@ -17,8 +17,6 @@ export const TieBreakerModal: React.FC<TieBreakerModalProps> = ({
   isOpen,
   tiedPlayerIds,
   players,
-  hasGoddess,
-  goddessPlayer,
   onResolveTie,
 }) => {
   const tiedPlayers = players.filter(p => tiedPlayerIds.includes(p.id));
@@ -34,38 +32,7 @@ export const TieBreakerModal: React.FC<TieBreakerModalProps> = ({
           Pilih metode pemecah seri:
         </div>
 
-        {/* Option 1: Goddess of Justice Decision (if present) */}
-        {hasGoddess && goddessPlayer && (
-          <div className="p-3.5 rounded-2xl bg-purple-500/15 border border-purple-400/40 space-y-3">
-            <div className="flex items-center gap-2 text-purple-300 font-bold text-xs">
-              <Scale className="w-4 h-4" />
-              <span>Keputusan Goddess of Justice ({goddessPlayer.name})</span>
-            </div>
-            <p className="text-[11px] text-slate-300">
-              Dewi Keadilan memiliki hak mutlak untuk memilih siapa di antara pemain seri yang harus tereliminasi:
-            </p>
-
-            <div className="grid grid-cols-2 gap-2">
-              {tiedPlayers.map(p => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => {
-                    soundEffects.playElimination();
-                    triggerHaptic('heavy');
-                    onResolveTie('GODDESS', p.id);
-                  }}
-                  className="p-2.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-purple-400 font-bold text-xs text-white flex items-center justify-center gap-2 btn-tactile"
-                >
-                  <span>{p.avatar}</span>
-                  <span>{p.name}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Option 2: Suit Manual (RPS) */}
+        {/* Option 1: Suit Manual (RPS) */}
         <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-3">
           <div className="flex items-center gap-2 text-sky-400 font-bold text-xs">
             <Swords className="w-4 h-4" />
@@ -94,7 +61,7 @@ export const TieBreakerModal: React.FC<TieBreakerModalProps> = ({
           </div>
         </div>
 
-        {/* Option 3: Voting Ulang */}
+        {/* Option 2: Voting Ulang */}
         <button
           type="button"
           onClick={() => {

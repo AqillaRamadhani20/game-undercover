@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Modal } from '../common/Modal';
 import type { PlayerProfile } from '../../types/game';
-import { UserPlus, Trash2, Users, Camera, Sparkles, RotateCcw } from 'lucide-react';
+import { UserPlus, Trash2, Users, Camera, RotateCcw } from 'lucide-react';
 import { DEFAULT_AVATARS, resetAllProfilesToDefault } from '../../utils/storage';
-import { FAMOUS_PRESET_NAMES } from '../../data/wordPairs';
 import { soundEffects, triggerHaptic } from '../../utils/audio';
 import { processImageFile } from '../../utils/imageUpload';
 
@@ -28,6 +27,18 @@ export const GroupPlayersModal: React.FC<GroupPlayersModalProps> = ({
     e.preventDefault();
     if (profiles.length >= 20) return;
     const name = newPlayerName.trim();
+
+    // Prevent duplicate player names
+    if (name) {
+      const isDuplicate = profiles.some(
+        p => p.name.trim().toLowerCase() === name.toLowerCase()
+      );
+      if (isDuplicate) {
+        alert(`Nama "${name}" sudah digunakan! Setiap pemain harus memiliki nama yang berbeda.`);
+        return;
+      }
+    }
+
     const nextAvatar = DEFAULT_AVATARS[profiles.length % DEFAULT_AVATARS.length] || '🦎';
 
     const newProfile: PlayerProfile = {
@@ -109,30 +120,17 @@ export const GroupPlayersModal: React.FC<GroupPlayersModalProps> = ({
     }
   };
 
-  // Quick feature: Fill empty names with fun Superhero / Artis names
-  const handleFillFamousNames = () => {
-    soundEffects.playPop();
-    triggerHaptic('medium');
-    const shuffled = [...FAMOUS_PRESET_NAMES].sort(() => Math.random() - 0.5);
-    const updated = profiles.map((p, idx) => ({
-      ...p,
-      name: shuffled[idx % shuffled.length],
-    }));
-    onUpdateProfiles(updated);
-  };
-
-  // Quick feature: Clear all names to start fresh and empty
+  // Quick feature: Clear all names & photos to start fresh and empty
   const handleClearAllNames = () => {
     soundEffects.playPop();
     triggerHaptic('light');
     const updated = profiles.map(p => ({
       ...p,
       name: '',
+      avatarImage: undefined,
     }));
     onUpdateProfiles(updated);
   };
-
-  const POPULAR_CHIPS = ['Batman', 'Spiderman', 'Ironman', 'Desta', 'Vincent', 'Raffi', 'Komeng', 'Thor', 'Zendaya'];
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Kelola Pemain & Nama" maxWidth="max-w-md">
@@ -154,41 +152,12 @@ export const GroupPlayersModal: React.FC<GroupPlayersModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={handleFillFamousNames}
-              title="Isi nama pemain dengan karakter Artis & Superhero populer"
-              className="text-xs text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 btn-tactile font-heading"
-            >
-              <Sparkles className="w-3.5 h-3.5" /> Acak Nama Artis
-            </button>
-            <span className="text-slate-600">•</span>
-            <button
-              type="button"
               onClick={handleClearAllNames}
               title="Kosongkan semua nama pemain"
               className="text-xs text-slate-400 hover:text-slate-200 font-medium flex items-center gap-1 btn-tactile"
             >
-              <RotateCcw className="w-3 h-3" /> Kosongkan
+              <RotateCcw className="w-3 h-3" /> Kosongkan Semua Nama
             </button>
-          </div>
-        </div>
-
-        {/* Suggestion Chips */}
-        <div className="space-y-1">
-          <p className="text-[10px] text-slate-400 font-medium">Saran Nama Cepat:</p>
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-            {POPULAR_CHIPS.map(chip => (
-              <button
-                key={chip}
-                type="button"
-                onClick={() => {
-                  soundEffects.playPop();
-                  setNewPlayerName(chip);
-                }}
-                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-bold text-slate-200 whitespace-nowrap btn-tactile font-heading"
-              >
-                +{chip}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -227,18 +196,34 @@ export const GroupPlayersModal: React.FC<GroupPlayersModalProps> = ({
                 </div>
 
                 {/* Name Input (starts empty, placeholder: Pemain X) */}
-                <input
-                  type="text"
-                  value={p.name}
-                  onChange={(e) => {
-                    const updated = [...profiles];
-                    updated[idx] = { ...updated[idx], name: e.target.value };
-                    onUpdateProfiles(updated);
-                  }}
-                  maxLength={16}
-                  placeholder={`Pemain ${idx + 1}`}
-                  className="w-full text-sm font-bold bg-transparent text-white placeholder-slate-500 focus:outline-none focus:border-b focus:border-sky-400 font-heading"
-                />
+                <div className="flex-1 min-w-0">
+                  <input
+                    type="text"
+                    value={p.name}
+                    onChange={(e) => {
+                      const updated = [...profiles];
+                      // Clear custom photo if name is changed
+                      updated[idx] = { 
+                        ...updated[idx], 
+                        name: e.target.value, 
+                        avatarImage: undefined 
+                      };
+                      onUpdateProfiles(updated);
+                    }}
+                    maxLength={16}
+                    placeholder={`Pemain ${idx + 1}`}
+                    className={`w-full text-sm font-bold bg-transparent text-white placeholder-slate-500 focus:outline-none focus:border-b font-heading ${
+                      p.name.trim() && profiles.some((other, oIdx) => oIdx !== idx && other.name.trim().toLowerCase() === p.name.trim().toLowerCase())
+                        ? 'border-b-2 border-rose-500 text-rose-300'
+                        : 'focus:border-sky-400'
+                    }`}
+                  />
+                  {p.name.trim() && profiles.some((other, oIdx) => oIdx !== idx && other.name.trim().toLowerCase() === p.name.trim().toLowerCase()) && (
+                    <span className="text-[10px] text-rose-400 font-bold block mt-0.5">
+                      ⚠️ Nama kembar!
+                    </span>
+                  )}
+                </div>
               </div>
 
               <button

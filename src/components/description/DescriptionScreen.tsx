@@ -93,6 +93,7 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
   const alivePlayers = players.filter(p => p.isAlive);
   const aliveUndercoverCount = alivePlayers.filter(p => p.role === 'UNDERCOVER').length;
   const aliveMrWhiteCount = alivePlayers.filter(p => p.role === 'MR_WHITE').length;
+  const aliveCivilianCount = alivePlayers.filter(p => p.role === 'CIVILIAN').length;
 
   // Ordered alive players list
   const orderedAlivePlayers: Player[] = speechOrderIds
@@ -238,13 +239,13 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
             </div>
           </div>
 
-          {/* Card 2: Peran Khusus */}
+          {/* Card 2: Warga (Civilian) */}
           <div className="papan-glass rounded-2xl px-5 py-2 flex flex-col items-center min-w-[130px]">
             <span className="text-[11px] font-semibold text-slate-300 mb-1">
-              Peran Khusus
+              Warga (Civilian)
             </span>
-            <span className="text-sm font-bold text-slate-300 font-heading">
-              Tidak ada
+            <span className="text-sm font-black text-sky-400 font-heading">
+              {aliveCivilianCount} Hidup
             </span>
           </div>
         </div>
@@ -863,87 +864,92 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
       )}
 
       {/* ================= EDIT PLAYER NAME MODAL ================= */}
-      {editingPlayer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="papan-glass-dark rounded-3xl p-6 max-w-xs w-full space-y-4 animate-scale-up shadow-2xl border border-white/10">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <div className="flex items-center gap-2">
-                <Pencil className="w-4 h-4 text-amber-400" />
-                <h3 className="text-base font-black text-white font-heading">
-                  Edit Nama Pemain
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditingPlayer(null)}
-                className="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center btn-tactile"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+      {editingPlayer && (() => {
+        const trimmedEditing = editingNameInput.trim().toLowerCase();
+        const isDuplicateEditName = Boolean(
+          trimmedEditing &&
+          players.some(p => p.id !== editingPlayer.id && p.name.trim().toLowerCase() === trimmedEditing)
+        );
 
-            <div className="space-y-3">
-              <div>
-                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1 font-heading">
-                  Nama Baru:
-                </label>
-                <input
-                  type="text"
-                  value={editingNameInput}
-                  onChange={(e) => setEditingNameInput(e.target.value)}
-                  placeholder="Ketik nama pemain..."
-                  maxLength={16}
-                  autoFocus
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border-2 border-slate-600 focus:border-amber-400 text-white text-sm font-bold text-center focus:outline-none font-heading shadow-inner placeholder:text-slate-500"
-                />
-              </div>
-
-              {/* Quick Suggestion Chips */}
-              <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                {['Batman', 'Spiderman', 'Desta', 'Vincent', 'Raffi', 'Komeng', 'Thor'].map(chip => (
-                  <button
-                    key={chip}
-                    type="button"
-                    onClick={() => {
-                      soundEffects.playPop();
-                      setEditingNameInput(chip);
-                    }}
-                    className="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[10px] font-bold text-amber-300 btn-tactile font-heading"
-                  >
-                    {chip}
-                  </button>
-                ))}
-              </div>
-
-              {/* Save & Cancel Buttons */}
-              <div className="flex items-center gap-2 pt-2">
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+            <div className="papan-glass-dark rounded-3xl p-6 max-w-xs w-full space-y-4 animate-scale-up shadow-2xl border border-white/10">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <div className="flex items-center gap-2">
+                  <Pencil className="w-4 h-4 text-amber-400" />
+                  <h3 className="text-base font-black text-white font-heading">
+                    Edit Nama Pemain
+                  </h3>
+                </div>
                 <button
                   type="button"
                   onClick={() => setEditingPlayer(null)}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs btn-tactile font-heading"
+                  className="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center btn-tactile"
                 >
-                  Batal
+                  <X className="w-4 h-4" />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const trimmed = editingNameInput.trim();
-                    if (trimmed) {
-                      soundEffects.playPop();
-                      triggerHaptic('light');
-                      onUpdatePlayerNameById?.(editingPlayer.id, trimmed);
-                      setEditingPlayer(null);
-                    }
-                  }}
-                  className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs shadow-md btn-tactile font-heading"
-                >
-                  Simpan
-                </button>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1 font-heading">
+                    Nama Baru:
+                  </label>
+                  <input
+                    type="text"
+                    value={editingNameInput}
+                    onChange={(e) => setEditingNameInput(e.target.value)}
+                    placeholder="Ketik nama pemain..."
+                    maxLength={16}
+                    autoFocus
+                    className={`w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border-2 text-white text-sm font-bold text-center focus:outline-none font-heading shadow-inner placeholder:text-slate-500 transition-colors ${
+                      isDuplicateEditName 
+                        ? 'border-rose-500 focus:border-rose-400' 
+                        : 'border-slate-600 focus:border-amber-400'
+                    }`}
+                  />
+                  {isDuplicateEditName && (
+                    <p className="text-[11px] text-rose-400 font-bold text-center mt-1">
+                      ⚠️ Nama sudah digunakan pemain lain! Gunakan nama berbeda.
+                    </p>
+                  )}
+                </div>
+
+                {/* Save & Cancel Buttons */}
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingPlayer(null)}
+                    className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs btn-tactile font-heading"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!editingNameInput.trim() || isDuplicateEditName}
+                    onClick={() => {
+                      const trimmed = editingNameInput.trim();
+                      if (trimmed && !isDuplicateEditName) {
+                        soundEffects.playPop();
+                        triggerHaptic('light');
+                        onUpdatePlayerNameById?.(editingPlayer.id, trimmed);
+                        setEditingPlayer(null);
+                      }
+                    }}
+                    className={`flex-1 py-2.5 rounded-xl font-black text-xs shadow-md btn-tactile font-heading ${
+                      !editingNameInput.trim() || isDuplicateEditName
+                        ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                        : 'bg-amber-500 hover:bg-amber-400 text-black'
+                    }`}
+                  >
+                    Simpan
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };
