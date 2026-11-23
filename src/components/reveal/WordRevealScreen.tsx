@@ -8,7 +8,10 @@ import {
   RefreshCw,
   BookOpen,
   X,
-  UserCheck
+  UserCheck,
+  Users,
+  Crown,
+  Sparkles
 } from 'lucide-react';
 import { 
   InfiltratorHat,
@@ -81,6 +84,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
 
   // General game menu
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeMenuSubModal, setActiveMenuSubModal] = useState<'PLAYERS' | 'LEADERBOARD' | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [playerNameInput, setPlayerNameInput] = useState('');
@@ -800,11 +804,52 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
             </div>
 
             <div className="space-y-2.5">
-              {/* Opsi 1: Pilih Ulang Kata */}
+              {/* Opsi 1: Daftar Pemain */}
+              <button
+                type="button"
+                onClick={() => {
+                  soundEffects.playPop();
+                  setIsMenuOpen(false);
+                  setActiveMenuSubModal('PLAYERS');
+                }}
+                className="w-full p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 hover:bg-amber-500/25 text-left flex items-center gap-3.5 btn-tactile"
+              >
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-white">Daftar Pemain</h4>
+                  <p className="text-[11px] text-slate-300">Lihat komposisi peran & seluruh pemain</p>
+                </div>
+              </button>
+
+              {/* Opsi 2: Papan Peringkat */}
+              <button
+                type="button"
+                onClick={() => {
+                  soundEffects.playPop();
+                  setIsMenuOpen(false);
+                  setActiveMenuSubModal('LEADERBOARD');
+                }}
+                className="w-full p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-400/30 hover:border-amber-400/50 text-left flex items-center gap-3.5 btn-tactile"
+              >
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-900 flex items-center justify-center shrink-0 shadow-md">
+                  <Crown className="w-5 h-5 fill-amber-950/80 stroke-none" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-white flex items-center gap-1.5">
+                    <span>Papan Peringkat</span>
+                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  </h4>
+                  <p className="text-[11px] text-slate-300">Mahkota emas, perak & skor pemain</p>
+                </div>
+              </button>
+
+              {/* Opsi 3: Pilih Ulang Kata */}
               <button
                 type="button"
                 onClick={handleTriggerReroll}
-                className="w-full p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 hover:bg-amber-500/25 text-left flex items-center gap-3.5 btn-tactile"
+                className="w-full p-3.5 rounded-2xl bg-slate-800 border border-slate-700 hover:bg-slate-700 text-left flex items-center gap-3.5 btn-tactile"
               >
                 <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
                   <RefreshCw className="w-5 h-5" />
@@ -815,7 +860,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                 </div>
               </button>
 
-              {/* Opsi 2: Aturan Main */}
+              {/* Opsi 4: Aturan Main */}
               <button
                 type="button"
                 onClick={() => {
@@ -833,7 +878,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                 </div>
               </button>
 
-              {/* Opsi 3: Keluar ke Lobby */}
+              {/* Opsi 5: Keluar ke Lobby */}
               <button
                 type="button"
                 onClick={() => {
@@ -864,6 +909,218 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
           </div>
         </div>
       )}
+
+      {/* ================= SUB-MODAL 1: DAFTAR PEMAIN (IMAGE 6) ================= */}
+      {activeMenuSubModal === 'PLAYERS' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+          <div className="papan-glass-dark border border-white/20 rounded-3xl p-6 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl">
+            {/* Header: Daftar pemain */}
+            <h3 className="text-2xl font-black text-white font-heading text-center tracking-wide">
+              Daftar pemain
+            </h3>
+
+            {/* Top White Role Capsule: Civilian, Undercover, Mr. White */}
+            <div className="bg-white rounded-full py-2 px-6 flex items-center justify-between shadow-lg max-w-[220px] mx-auto text-slate-900">
+              {/* Civilian: Blue silhouette */}
+              <div className="flex flex-col items-center">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#38BDF8]">
+                  <path d="M12 2C8.69 2 6 4.69 6 8c0 2.21 1.2 4.15 3 5.19V14c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-.81c1.8-1.04 3-2.98 3-5.19 0-3.31-2.69-6-6-6z" />
+                  <path d="M4 22c0-3.31 3.58-6 8-6s8 2.69 8 6v1H4v-1z" />
+                </svg>
+                <span className="text-xs font-black text-slate-900 leading-tight mt-0.5">
+                  {totalPlayers - undercoverCount - mrWhiteCount}
+                </span>
+              </div>
+
+              {/* Undercover: Black infiltrator hat */}
+              <div className="flex flex-col items-center">
+                <InfiltratorHat isWhite={false} className="w-5 h-5" />
+                <span className="text-xs font-black text-slate-900 leading-tight mt-0.5">
+                  {undercoverCount}
+                </span>
+              </div>
+
+              {/* Mr. White: White infiltrator hat */}
+              <div className="flex flex-col items-center">
+                <InfiltratorHat isWhite={true} className="w-5 h-5 filter drop-shadow-xs" />
+                <span className="text-xs font-black text-slate-900 leading-tight mt-0.5">
+                  {mrWhiteCount}
+                </span>
+              </div>
+            </div>
+
+            {/* Player List Rows */}
+            <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+              {Array.from({ length: totalPlayers }).map((_, idx) => {
+                const claimed = Object.values(claimedCardsMap).find(c => c.playerNumber === idx + 1);
+                const name = claimed?.name || allPlayers?.[idx]?.name?.trim() || savedProfiles?.[idx]?.name?.trim() || `Pemain ${idx + 1}`;
+                const initial = name.charAt(0).toUpperCase();
+                const score = allPlayers?.[idx]?.score ?? savedProfiles?.[idx]?.totalScore ?? 0;
+                const colors = ['bg-[#2DD4BF]', 'bg-[#38BDF8]', 'bg-[#4ADE80]', 'bg-[#F59E0B]', 'bg-[#FB7185]'];
+                const circleColor = colors[idx % colors.length];
+
+                return (
+                  <div key={idx} className="flex items-center justify-between gap-3">
+                    {/* Circular Avatar with Initial Letter */}
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm font-heading shrink-0 shadow-md overflow-hidden ${circleColor}`}>
+                      {initial}
+                    </div>
+
+                    {/* Green Rounded Pill with Player Name */}
+                    <div className="bg-[#4ADE80] text-white font-bold text-xs px-4 py-2 rounded-full flex-1 max-w-[180px] truncate text-left shadow-xs">
+                      {name}
+                    </div>
+
+                    {/* Score on Right: Number and "PN" */}
+                    <div className="text-right shrink-0 min-w-[32px] font-heading">
+                      <span className="text-sm font-black text-white block leading-tight">
+                        {score}
+                      </span>
+                      <span className="text-[9px] font-bold text-slate-400 block leading-tight">
+                        PN
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Bottom Circular Cyan Check Button (Image 6) */}
+            <div className="pt-2 flex justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  soundEffects.playPop();
+                  setActiveMenuSubModal(null);
+                }}
+                className="w-14 h-14 rounded-full bg-[#38BDF8] hover:bg-[#0EA5E9] text-white flex items-center justify-center shadow-xl border-2 border-white/20 btn-tactile"
+                aria-label="Tutup Daftar Pemain"
+              >
+                <Check className="w-8 h-8 stroke-[3]" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= SUB-MODAL 2: PAPAN PERINGKAT ================= */}
+      {activeMenuSubModal === 'LEADERBOARD' && (() => {
+        const rankedPlayers = (allPlayers || []).map((p, idx) => {
+          const prof = savedProfiles?.find(pr => pr.id === p.id || pr.name === p.name);
+          const score = (prof?.totalScore !== undefined && prof.totalScore > 0) ? prof.totalScore : (p.score ?? 0);
+          return { ...p, score, originalIdx: idx };
+        }).sort((a, b) => b.score - a.score);
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+            <div className="papan-glass-dark border border-white/20 rounded-3xl p-6 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500/25 to-yellow-400/20 text-amber-400 border border-amber-400/40 flex items-center justify-center shrink-0 shadow-md">
+                    <Crown className="w-6 h-6 fill-amber-400/30 text-amber-300" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-white font-heading flex items-center gap-1.5">
+                      <span>Papan Peringkat</span>
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    </h3>
+                    <p className="text-[11px] text-slate-300">
+                      Peringkat Mahkota & Skor
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveMenuSubModal(null)}
+                  className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center btn-tactile"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
+                {rankedPlayers.map((p, idx) => {
+                  const rank = idx + 1;
+                  return (
+                    <div
+                      key={p.id || idx}
+                      className={`relative flex items-center justify-between p-3 rounded-2xl border transition-all ${
+                        rank === 1
+                          ? 'papan-glass border-amber-400/80 bg-amber-500/10 shadow-[0_4px_20px_rgba(245,158,11,0.2)]'
+                          : rank === 2
+                          ? 'papan-glass border-slate-300/50 bg-slate-300/10 shadow-sm'
+                          : rank === 3
+                          ? 'papan-glass border-amber-700/50 bg-amber-800/10 shadow-sm'
+                          : 'papan-glass border-white/5'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="shrink-0 flex items-center justify-center w-8">
+                          {rank === 1 ? (
+                            <div className="flex flex-col items-center">
+                              <Crown className="w-5 h-5 text-amber-300 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+                              <span className="text-[10px] font-black text-amber-300 font-heading">#1</span>
+                            </div>
+                          ) : rank === 2 ? (
+                            <div className="flex flex-col items-center">
+                              <Crown className="w-4 h-4 text-slate-200 fill-slate-300/60" />
+                              <span className="text-[10px] font-black text-slate-200 font-heading">#2</span>
+                            </div>
+                          ) : rank === 3 ? (
+                            <div className="flex flex-col items-center">
+                              <Crown className="w-4 h-4 text-amber-600 fill-amber-700/60" />
+                              <span className="text-[10px] font-black text-amber-400 font-heading">#3</span>
+                            </div>
+                          ) : (
+                            <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs font-heading">
+                              #{rank}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-800 flex items-center justify-center text-sm font-bold shadow-md shrink-0">
+                          {p.avatarImage ? (
+                            <img src={p.avatarImage} alt={p.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className={`font-heading font-black ${
+                              rank === 1 ? 'text-amber-300' : rank === 2 ? 'text-slate-200' : rank === 3 ? 'text-amber-400' : 'text-white'
+                            }`}>
+                              {(p.name.trim() || `P${rank}`).charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="text-xs font-black text-white font-heading truncate">
+                            {p.name.trim() || `Pemain ${rank}`}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0 pl-2 font-heading">
+                        <span className={`text-lg font-black ${
+                          rank === 1 ? 'text-amber-400' : rank === 2 ? 'text-slate-200' : rank === 3 ? 'text-amber-500' : 'text-slate-300'
+                        }`}>
+                          {p.score ?? 0}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-400 ml-1">pts</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveMenuSubModal(null)}
+                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold btn-tactile"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

@@ -18,7 +18,9 @@ import {
   X,
   Lock,
   Pencil,
-  Trash2
+  Trash2,
+  Crown,
+  Sparkles
 } from 'lucide-react';
 import { InfiltratorHat } from '../common/UndercoverIcons';
 import { soundEffects, triggerHaptic } from '../../utils/audio';
@@ -71,7 +73,7 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
 }) => {
   // Menu Sheet State
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeSubModal, setActiveSubModal] = useState<'TIMER' | 'AMNESIC' | 'PLAYERS' | 'SETTINGS' | null>(null);
+  const [activeSubModal, setActiveSubModal] = useState<'TIMER' | 'AMNESIC' | 'PLAYERS' | 'LEADERBOARD' | 'SETTINGS' | null>(null);
 
   // Edit Player Name State
   const [editingPlayer, setEditingPlayer] = useState<{ id: string; name: string } | null>(null);
@@ -173,7 +175,7 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
     setIsMenuOpen(prev => !prev);
   };
 
-  const handleOpenSubModal = (modal: 'TIMER' | 'AMNESIC' | 'PLAYERS' | 'SETTINGS') => {
+  const handleOpenSubModal = (modal: 'TIMER' | 'AMNESIC' | 'PLAYERS' | 'LEADERBOARD' | 'SETTINGS') => {
     soundEffects.playPop();
     triggerHaptic('light');
     setIsMenuOpen(false);
@@ -421,7 +423,26 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
               </span>
             </button>
 
-            {/* 4. Pengaturan */}
+            {/* 4. Papan Peringkat */}
+            <button
+              type="button"
+              onClick={() => handleOpenSubModal('LEADERBOARD')}
+              className="w-full flex items-center gap-4 py-2.5 px-3 rounded-2xl hover:bg-slate-800/60 btn-tactile text-left"
+            >
+              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-900 flex items-center justify-center shadow-md shrink-0">
+                <Crown className="w-6 h-6 fill-amber-950/80 stroke-none" />
+              </div>
+              <div>
+                <span className="text-white text-base font-bold font-heading block">
+                  Papan Peringkat
+                </span>
+                <span className="text-[11px] text-slate-400 block">
+                  Mahkota emas, perak & skor pemain
+                </span>
+              </div>
+            </button>
+
+            {/* 5. Pengaturan */}
             <button
               type="button"
               onClick={() => handleOpenSubModal('SETTINGS')}
@@ -763,6 +784,121 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
           </div>
         </div>
       )}
+
+      {/* ================= SUB-MODAL: PAPAN PERINGKAT ================= */}
+      {activeSubModal === 'LEADERBOARD' && (() => {
+        const rankedPlayers = [...players].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+            <div className="papan-glass-dark border border-white/20 rounded-3xl p-6 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500/25 to-yellow-400/20 text-amber-400 border border-amber-400/40 flex items-center justify-center shrink-0 shadow-md">
+                    <Crown className="w-6 h-6 fill-amber-400/30 text-amber-300" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black text-white font-heading flex items-center gap-1.5">
+                      <span>Papan Peringkat</span>
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    </h3>
+                    <p className="text-[11px] text-slate-300">
+                      Peringkat Mahkota & Skor
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveSubModal(null)}
+                  className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center btn-tactile"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
+                {rankedPlayers.map((p, idx) => {
+                  const rank = idx + 1;
+                  return (
+                    <div
+                      key={p.id}
+                      className={`relative flex items-center justify-between p-3 rounded-2xl border transition-all ${
+                        rank === 1
+                          ? 'papan-glass border-amber-400/80 bg-amber-500/10 shadow-[0_4px_20px_rgba(245,158,11,0.2)]'
+                          : rank === 2
+                          ? 'papan-glass border-slate-300/50 bg-slate-300/10 shadow-sm'
+                          : rank === 3
+                          ? 'papan-glass border-amber-700/50 bg-amber-800/10 shadow-sm'
+                          : 'papan-glass border-white/5'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="shrink-0 flex items-center justify-center w-8">
+                          {rank === 1 ? (
+                            <div className="flex flex-col items-center">
+                              <Crown className="w-5 h-5 text-amber-300 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+                              <span className="text-[10px] font-black text-amber-300 font-heading">#1</span>
+                            </div>
+                          ) : rank === 2 ? (
+                            <div className="flex flex-col items-center">
+                              <Crown className="w-4 h-4 text-slate-200 fill-slate-300/60" />
+                              <span className="text-[10px] font-black text-slate-200 font-heading">#2</span>
+                            </div>
+                          ) : rank === 3 ? (
+                            <div className="flex flex-col items-center">
+                              <Crown className="w-4 h-4 text-amber-600 fill-amber-700/60" />
+                              <span className="text-[10px] font-black text-amber-400 font-heading">#3</span>
+                            </div>
+                          ) : (
+                            <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs font-heading">
+                              #{rank}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-800 flex items-center justify-center text-sm font-bold shadow-md shrink-0">
+                          {p.avatarImage ? (
+                            <img src={p.avatarImage} alt={p.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <span className={`font-heading font-black ${
+                              rank === 1 ? 'text-amber-300' : rank === 2 ? 'text-slate-200' : rank === 3 ? 'text-amber-400' : 'text-white'
+                            }`}>
+                              {(p.name.trim() || `P${rank}`).charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="text-xs font-black text-white font-heading truncate">
+                            {p.name.trim() || `Pemain ${rank}`}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0 pl-2 font-heading">
+                        <span className={`text-lg font-black ${
+                          rank === 1 ? 'text-amber-400' : rank === 2 ? 'text-slate-200' : rank === 3 ? 'text-amber-500' : 'text-slate-300'
+                        }`}>
+                          {p.score ?? 0}
+                        </span>
+                        <span className="text-[10px] font-bold text-slate-400 ml-1">pts</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveSubModal(null)}
+                className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold btn-tactile"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ================= SUB-MODAL 4: PENGATURAN ================= */}
       {activeSubModal === 'SETTINGS' && (
