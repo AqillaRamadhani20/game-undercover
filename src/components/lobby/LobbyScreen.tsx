@@ -6,13 +6,14 @@ import {
   Minus, 
   ArrowLeft,
   AlertCircle,
-  Music
+  Music,
+  RotateCcw
 } from 'lucide-react';
 import type { GameConfig, PlayerProfile } from '../../types/game';
 import { getAllWordPairs } from '../../data/wordPairs';
 import { calculateDefaultRoleCounts, validateRoleCounts } from '../../engine/roleDistributor';
 import { SliderBoyThumb } from '../common/UndercoverIcons';
-import { DEFAULT_AVATARS } from '../../utils/storage';
+import { DEFAULT_AVATARS, resetAllProfilesToDefault } from '../../utils/storage';
 import { soundEffects, triggerHaptic } from '../../utils/audio';
 import { GroupPlayersModal } from './GroupPlayersModal';
 import { CategoriesModal } from './CategoriesModal';
@@ -128,8 +129,8 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
           <ArrowLeft className="w-6 h-6 stroke-[2.5]" />
         </button>
 
-        {/* Center / Right Controls: BGM & Group */}
-        <div className="flex items-center gap-3">
+        {/* Center / Right Controls: BGM, Reset & Group */}
+        <div className="flex items-center gap-2.5">
           {/* Lo-fi BGM Ambience Button */}
           <div className="flex flex-col items-center">
             <button
@@ -148,6 +149,27 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
             <span className="text-[10px] font-bold text-slate-400 mt-1">
               {isBgmActive ? 'BGM On' : 'BGM'}
             </span>
+          </div>
+
+          {/* Quick Reset All Players Button */}
+          <div className="flex flex-col items-center">
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Reset semua pemain? Semua nama dan foto yang sudah ditambahkan sebelumnya akan dihapus dan kembali ke setelan awal.')) {
+                  soundEffects.playPop();
+                  triggerHaptic('medium');
+                  const fresh = resetAllProfilesToDefault();
+                  onUpdateProfiles(fresh);
+                }
+              }}
+              aria-label="Reset Semua Pemain"
+              title="Reset Semua Pemain (Hapus Semua Nama)"
+              className="w-11 h-11 rounded-full bg-slate-800 hover:bg-rose-950/60 text-slate-400 hover:text-rose-400 flex items-center justify-center shadow-md border border-slate-700 hover:border-rose-500/40 btn-tactile"
+            >
+              <RotateCcw className="w-5 h-5" />
+            </button>
+            <span className="text-[10px] font-bold text-slate-400 mt-1">Reset</span>
           </div>
 
           {/* Group Button */}

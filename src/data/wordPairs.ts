@@ -13,7 +13,7 @@ export const DEFAULT_WORD_PAIRS: WordPair[] = [
   { id: 'wp-7', category: 'Makanan & Minuman', wordA: 'Siomay', wordB: 'Batagor', hint: 'Jajanan bumbu kacang' },
   { id: 'wp-8', category: 'Makanan & Minuman', wordA: 'Tempe', wordB: 'Tahu', hint: 'Olahan kedelai bergizi' },
   { id: 'wp-9', category: 'Makanan & Minuman', wordA: 'Rendang', wordB: 'Semur', hint: 'Olahan daging kecap/rempah' },
-  { id: 'wp-10', category: 'Makanan & Minuman', wordA: 'Pempek', wordB: 'Tekwan', hint: 'Olahan ikan gurih' },
+  { id: 'wp-10', category: 'Makanan & Minuman', wordA: 'Mie', wordB: 'Bihun', hint: 'Olahan mi atau sohun gurih' },
   { id: 'wp-11', category: 'Makanan & Minuman', wordA: 'Cilok', wordB: 'Cireng', hint: 'Camilan aci kenyal' },
   { id: 'wp-12', category: 'Makanan & Minuman', wordA: 'Bakwan', wordB: 'Risol', hint: 'Gorengan renyah' },
   { id: 'wp-13', category: 'Makanan & Minuman', wordA: 'Ketoprak', wordB: 'Pecel', hint: 'Sayuran siram bumbu kacang' },
@@ -79,9 +79,9 @@ export const DEFAULT_WORD_PAIRS: WordPair[] = [
   { id: 'wp-65', category: 'Hewan & Alam', wordA: 'Bebek', wordB: 'Angsa', hint: 'Unggas air paruh pipih' },
   { id: 'wp-66', category: 'Hewan & Alam', wordA: 'Kuda', wordB: 'Zebra', hint: 'Hewan berkuku pelari cepat' },
   { id: 'wp-67', category: 'Hewan & Alam', wordA: 'Katak', wordB: 'Kodok', hint: 'Amfibi pelompat' },
-  { id: 'wp-68', category: 'Hewan & Alam', wordA: 'Semut', wordB: 'Rayap', hint: 'Serangga koloni kecil' },
-  { id: 'wp-69', category: 'Hewan & Alam', wordA: 'Kelinci', wordB: 'Marmut', hint: 'Hewan lucu berbulu' },
-  { id: 'wp-70', category: 'Hewan & Alam', wordA: 'Nyamuk', wordB: 'Lalat', hint: 'Serangga terbang kecil' },
+  { id: 'wp-68', category: 'Hewan & Alam', wordA: 'Semut', wordB: 'Nyamuk', hint: 'Serangga kecil di sekitar kita' },
+  { id: 'wp-69', category: 'Hewan & Alam', wordA: 'Gajah', wordB: 'Jerapah', hint: 'Hewan darat berukuran besar' },
+  { id: 'wp-70', category: 'Hewan & Alam', wordA: 'Kelinci', wordB: 'Kucing', hint: 'Hewan peliharaan lucu berbulu' },
   { id: 'wp-71', category: 'Hewan & Alam', wordA: 'Mawar', wordB: 'Melati', hint: 'Bunga harum menawan' },
   { id: 'wp-72', category: 'Hewan & Alam', wordA: 'Hutan', wordB: 'Kebun', hint: 'Hamparan pepohonan rimbun' },
   { id: 'wp-73', category: 'Hewan & Alam', wordA: 'Gurun', wordB: 'Bukit', hint: 'Bentang alam gersang/bergelombang' },
@@ -91,7 +91,7 @@ export const DEFAULT_WORD_PAIRS: WordPair[] = [
   { id: 'wp-77', category: 'Hewan & Alam', wordA: 'Monyet', wordB: 'Kera', hint: 'Primata cerdas lincah' },
   { id: 'wp-78', category: 'Hewan & Alam', wordA: 'Elang', wordB: 'Gagak', hint: 'Burung berparuh tajam' },
   { id: 'wp-79', category: 'Hewan & Alam', wordA: 'Lebah', wordB: 'Tawon', hint: 'Serangga bersengat madu' },
-  { id: 'wp-80', category: 'Hewan & Alam', wordA: 'Ular', wordB: 'Belut', hint: 'Hewan panjang melata/licin' },
+  { id: 'wp-80', category: 'Hewan & Alam', wordA: 'Buaya', wordB: 'Komodo', hint: 'Reptil predator besar Indonesia' },
   { id: 'wp-81', category: 'Hewan & Alam', wordA: 'Kambing', wordB: 'Domba', hint: 'Ternak herbivora berbulu' },
   { id: 'wp-82', category: 'Hewan & Alam', wordA: 'Sapi', wordB: 'Kerbau', hint: 'Ternak besar penghasil susu/tenaga' },
   { id: 'wp-83', category: 'Hewan & Alam', wordA: 'Kelapa', wordB: 'Sawit', hint: 'Pohon palem kaya minyak' },
@@ -118,10 +118,10 @@ export const DEFAULT_WORD_PAIRS: WordPair[] = [
   { id: 'wp-100', category: 'Teknologi & Pop', wordA: 'Anime', wordB: 'Kartun', hint: 'Film animasi bergambar' },
   { id: 'wp-101', category: 'Teknologi & Pop', wordA: 'Twitter', wordB: 'Threads', hint: 'Media sosial cuitan teks' },
   { id: 'wp-102', category: 'Teknologi & Pop', wordA: 'Kamera', wordB: 'Webcam', hint: 'Perekam gambar dan video' },
-  { id: 'wp-103', category: 'Teknologi & Pop', wordA: 'Keyboard', wordB: 'Keypad', hint: 'Papan ketik tombol angka/huruf' },
-  { id: 'wp-104', category: 'Teknologi & Pop', wordA: 'Komputer', wordB: 'Server', hint: 'Mesin pemroses data digital' },
-  { id: 'wp-105', category: 'Teknologi & Pop', wordA: 'Flashdisk', wordB: 'Disket', hint: 'Penyimpan data eksternal portabel' },
-  { id: 'wp-106', category: 'Teknologi & Pop', wordA: 'Speaker', wordB: 'Megafon', hint: 'Pengeras suara audio' },
+  { id: 'wp-103', category: 'Teknologi & Pop', wordA: 'Televisi', wordB: 'Bioskop', hint: 'Layar tontonan hiburan video' },
+  { id: 'wp-104', category: 'Teknologi & Pop', wordA: 'Komputer', wordB: 'Laptop', hint: 'Perangkat kerja dan komputasi' },
+  { id: 'wp-105', category: 'Teknologi & Pop', wordA: 'Flashdisk', wordB: 'Memori', hint: 'Penyimpan file data portabel' },
+  { id: 'wp-106', category: 'Teknologi & Pop', wordA: 'Speaker', wordB: 'Headset', hint: 'Alat pengeras atau pemutar suara' },
 
   // ==========================================
   // 5. Profesi & Transportasi (20 Pasang - 1 Kata)
@@ -156,12 +156,12 @@ export const DEFAULT_WORD_PAIRS: WordPair[] = [
   { id: 'wp-130', category: 'Artis & Superhero', wordA: 'Ironman', wordB: 'Batman', hint: 'Miliarder jenius berzirah canggih' },
   { id: 'wp-131', category: 'Artis & Superhero', wordA: 'Hulk', wordB: 'Thanos', hint: 'Raksasa berdaya fisik dahsyat' },
   { id: 'wp-132', category: 'Artis & Superhero', wordA: 'Wolverine', wordB: 'Deadpool', hint: 'Mutan bermata pisau atau regenerasi cepat' },
-  { id: 'wp-133', category: 'Artis & Superhero', wordA: 'Flash', wordB: 'Quicksilver', hint: 'Pahlawan berkecepatan kilat' },
-  { id: 'wp-134', category: 'Artis & Superhero', wordA: 'Joker', wordB: 'Penguin', hint: 'Musuh ikonik Kota Gotham' },
-  { id: 'wp-135', category: 'Artis & Superhero', wordA: 'Venom', wordB: 'Carnage', hint: 'Makhluk simbiosis alien' },
-  { id: 'wp-136', category: 'Artis & Superhero', wordA: 'Gundala', wordB: 'Godam', hint: 'Superhero jagoan Indonesia' },
-  { id: 'wp-137', category: 'Artis & Superhero', wordA: 'Aquaman', wordB: 'Namor', hint: 'Penguasa kerajaan laut samudra' },
-  { id: 'wp-138', category: 'Artis & Superhero', wordA: 'Hawkeye', wordB: 'Arrow', hint: 'Pahlawan pemanah jitu' },
+  { id: 'wp-133', category: 'Artis & Superhero', wordA: 'Flash', wordB: 'Sonic', hint: 'Karakter pahlawan berkecepatan kilat' },
+  { id: 'wp-134', category: 'Artis & Superhero', wordA: 'Joker', wordB: 'Thanos', hint: 'Karakter penjahat paling ikonik' },
+  { id: 'wp-135', category: 'Artis & Superhero', wordA: 'Venom', wordB: 'Spiderman', hint: 'Karakter jagoan laba-laba atau simbiot' },
+  { id: 'wp-136', category: 'Artis & Superhero', wordA: 'Gundala', wordB: 'Gatotkaca', hint: 'Superhero jagoan hebat Indonesia' },
+  { id: 'wp-137', category: 'Artis & Superhero', wordA: 'Aquaman', wordB: 'Poseidon', hint: 'Penguasa lautan samudra berkuasa' },
+  { id: 'wp-138', category: 'Artis & Superhero', wordA: 'Batman', wordB: 'Robin', hint: 'Duo pahlawan pelindung Kota Gotham' },
   { id: 'wp-139', category: 'Artis & Superhero', wordA: 'Naruto', wordB: 'Sasuke', hint: 'Ninja legendaris Konoha' },
   { id: 'wp-140', category: 'Artis & Superhero', wordA: 'Luffy', wordB: 'Zoro', hint: 'Pendekar bajak laut Topi Jerami' },
   { id: 'wp-141', category: 'Artis & Superhero', wordA: 'Goku', wordB: 'Vegeta', hint: 'Prajurit bangsa Saiya terkuat' },
@@ -174,12 +174,12 @@ export const DEFAULT_WORD_PAIRS: WordPair[] = [
   { id: 'wp-148', category: 'Artis & Superhero', wordA: 'Tulus', wordB: 'Judika', hint: 'Penyanyi pria bersuara emas' },
   { id: 'wp-149', category: 'Artis & Superhero', wordA: 'Raisa', wordB: 'Isyana', hint: 'Diva pop wanita bersuara merdu' },
   { id: 'wp-150', category: 'Artis & Superhero', wordA: 'Agnez', wordB: 'Anggun', hint: 'Penyanyi wanita Indonesia go international' },
-  { id: 'wp-151', category: 'Artis & Superhero', wordA: 'Leonardo', wordB: 'Brad', hint: 'Aktor papan atas Hollywood' },
-  { id: 'wp-152', category: 'Artis & Superhero', wordA: 'Zendaya', wordB: 'Jenna', hint: 'Aktris muda berbakat Hollywood' },
+  { id: 'wp-151', category: 'Artis & Superhero', wordA: 'Atta', wordB: 'Thariq', hint: 'YouTuber kakak beradik populer Indonesia' },
+  { id: 'wp-152', category: 'Artis & Superhero', wordA: 'Taylor', wordB: 'Selena', hint: 'Penyanyi pop wanita sahabat selebriti' },
   { id: 'wp-153', category: 'Artis & Superhero', wordA: 'Ronaldo', wordB: 'Messi', hint: 'Megabintang sepakbola dunia' },
   { id: 'wp-154', category: 'Artis & Superhero', wordA: 'Barbie', wordB: 'Ken', hint: 'Karakter boneka ikonik dunia' },
   { id: 'wp-155', category: 'Artis & Superhero', wordA: 'Beyonce', wordB: 'Rihanna', hint: 'Bintang diva musik pop global' },
-  { id: 'wp-156', category: 'Artis & Superhero', wordA: 'Shazam', wordB: 'Superman', hint: 'Pahlawan berkekuatan super petir' },
+  { id: 'wp-156', category: 'Artis & Superhero', wordA: 'Nobita', wordB: 'Doraemon', hint: 'Karakter kartun sahabat sejati' },
 ];
 
 export const CATEGORIES = [
@@ -193,12 +193,21 @@ export const CATEGORIES = [
 
 export const FAMOUS_PRESET_NAMES = [
   'Batman', 'Superman', 'Spiderman', 'Ironman', 'Deadpool',
-  'Thor', 'Hulk', 'Loki', 'Joker', 'Wolverine',
-  'Gundala', 'Naruto', 'Sasuke', 'Luffy', 'Zoro',
+  'Thor', 'Hulk', 'Loki', 'Joker', 'Thanos',
+  'Gundala', 'Gatotkaca', 'Naruto', 'Sasuke', 'Luffy',
   'Raffi', 'Desta', 'Vincent', 'Sule', 'Andre',
   'Komeng', 'Iqbaal', 'Reza', 'Raditya', 'Tulus',
-  'Raisa', 'Agnez', 'Zendaya', 'Messi', 'Ronaldo'
+  'Raisa', 'Agnez', 'Taylor', 'Messi', 'Ronaldo'
 ];
+
+export function secureRandomFloat(): number {
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    const arr = new Uint32Array(1);
+    crypto.getRandomValues(arr);
+    return arr[0] / (0xffffffff + 1);
+  }
+  return Math.random();
+}
 
 const PERSONAL_WORDS_KEY = 'undercover_personal_words';
 
@@ -244,12 +253,12 @@ export function selectRandomWordPair(
     pool = filtered.length > 0 ? filtered : all;
   }
 
-  // Pick random pair
-  const randomIndex = Math.floor(Math.random() * pool.length);
+  // Pick random pair with cryptographic randomness
+  const randomIndex = Math.floor(secureRandomFloat() * pool.length);
   const pair = pool[randomIndex];
 
   // Random swap 50/50 so wordA isn't always Civilian
-  const isSwap = Math.random() > 0.5;
+  const isSwap = secureRandomFloat() > 0.5;
   const civilianWord = isSwap ? pair.wordB : pair.wordA;
   const undercoverWord = isSwap ? pair.wordA : pair.wordB;
 

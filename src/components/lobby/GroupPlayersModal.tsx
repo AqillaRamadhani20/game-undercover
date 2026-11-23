@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Modal } from '../common/Modal';
 import type { PlayerProfile } from '../../types/game';
 import { UserPlus, Trash2, Users, Camera, Sparkles, RotateCcw } from 'lucide-react';
-import { DEFAULT_AVATARS } from '../../utils/storage';
+import { DEFAULT_AVATARS, resetAllProfilesToDefault } from '../../utils/storage';
 import { FAMOUS_PRESET_NAMES } from '../../data/wordPairs';
 import { soundEffects, triggerHaptic } from '../../utils/audio';
 import { processImageFile } from '../../utils/imageUpload';
@@ -46,10 +46,28 @@ export const GroupPlayersModal: React.FC<GroupPlayersModalProps> = ({
   };
 
   const handleRemovePlayer = (id: string) => {
-    if (profiles.length <= 3) return;
+    if (profiles.length <= 3) {
+      alert('Minimal harus ada 3 pemain untuk bermain Undercover.');
+      return;
+    }
+    const target = profiles.find(p => p.id === id);
+    const targetName = target?.name?.trim() ? `"${target.name.trim()}"` : 'pemain ini';
+    if (window.confirm(`Hapus ${targetName} dari daftar pemain?`)) {
+      soundEffects.playPop();
+      triggerHaptic('light');
+      onUpdateProfiles(profiles.filter(p => p.id !== id));
+    }
+  };
+
+  const handleResetAllPlayers = () => {
+    const confirmReset = window.confirm(
+      'Yakin ingin mereset semua pemain? Semua nama dan foto yang sudah ditambahkan sebelumnya akan dihapus dan kembali ke setelan awal (5 pemain default).'
+    );
+    if (!confirmReset) return;
     soundEffects.playPop();
-    triggerHaptic('light');
-    onUpdateProfiles(profiles.filter(p => p.id !== id));
+    triggerHaptic('medium');
+    const fresh = resetAllProfilesToDefault();
+    onUpdateProfiles(fresh);
   };
 
   const handleCycleAvatar = (index: number) => {
@@ -223,16 +241,21 @@ export const GroupPlayersModal: React.FC<GroupPlayersModalProps> = ({
                 />
               </div>
 
-              {profiles.length > 3 && (
-                <button
-                  type="button"
-                  onClick={() => handleRemovePlayer(p.id)}
-                  aria-label="Hapus Pemain"
-                  className="p-1.5 text-rose-400 hover:bg-rose-500/20 rounded-lg btn-tactile ml-2"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => handleRemovePlayer(p.id)}
+                disabled={profiles.length <= 3}
+                title={profiles.length <= 3 ? "Minimal 3 pemain untuk bermain" : `Hapus ${p.name || `Pemain ${idx + 1}`}`}
+                aria-label={`Hapus ${p.name || `Pemain ${idx + 1}`}`}
+                className={`px-2.5 py-1.5 text-xs rounded-xl flex items-center gap-1 font-bold btn-tactile ml-2 border transition-all ${
+                  profiles.length <= 3
+                    ? 'opacity-30 cursor-not-allowed border-slate-700 text-slate-500 bg-slate-900/40'
+                    : 'border-rose-500/40 text-rose-400 hover:text-white hover:bg-rose-600 bg-rose-500/10 shadow-xs'
+                }`}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Hapus</span>
+              </button>
             </div>
           ))}
         </div>
@@ -256,6 +279,19 @@ export const GroupPlayersModal: React.FC<GroupPlayersModalProps> = ({
             </button>
           </form>
         )}
+
+        {/* Reset Semua Pemain Button */}
+        <div className="pt-2 border-t border-slate-700/60">
+          <button
+            type="button"
+            onClick={handleResetAllPlayers}
+            title="Hapus semua nama dan foto pemain, kembali ke 5 pemain awal"
+            className="w-full py-2.5 px-3 rounded-xl border border-rose-500/40 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-bold text-xs flex items-center justify-center gap-2 btn-tactile font-heading shadow-xs"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            Reset Semua Pemain (Hapus Semua Nama)
+          </button>
+        </div>
       </div>
     </Modal>
   );

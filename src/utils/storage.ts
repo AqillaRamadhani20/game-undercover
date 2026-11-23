@@ -47,6 +47,18 @@ export function savePlayerProfiles(profiles: PlayerProfile[]): void {
   }
 }
 
+export function resetAllProfilesToDefault(): PlayerProfile[] {
+  const fresh: PlayerProfile[] = [
+    { id: 'p-1', name: '', avatar: '🦎', totalGames: 0, totalWins: 0, totalScore: 0 },
+    { id: 'p-2', name: '', avatar: '🦊', totalGames: 0, totalWins: 0, totalScore: 0 },
+    { id: 'p-3', name: '', avatar: '🐱', totalGames: 0, totalWins: 0, totalScore: 0 },
+    { id: 'p-4', name: '', avatar: '🐼', totalGames: 0, totalWins: 0, totalScore: 0 },
+    { id: 'p-5', name: '', avatar: '🐯', totalGames: 0, totalWins: 0, totalScore: 0 },
+  ];
+  savePlayerProfiles(fresh);
+  return fresh;
+}
+
 export function updateCumulativeScores(
   profiles: PlayerProfile[],
   roundDeltas: Record<string, number>,

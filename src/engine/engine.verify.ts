@@ -260,6 +260,72 @@ const updatedNameState = gameReducer(replayState, {
 assert(updatedNameState.players[0].name === 'Spiderman', 'Player name successfully updated via UPDATE_PLAYER_NAME_BY_ID');
 console.log('✅ PASSED: UPDATE_PLAYER_NAME_BY_ID successfully modifies target player name!');
 
+// 10. Free Card Choice & CLAIM_CARD_AND_NEXT
+console.log('\n[10. Free Card Choice & CLAIM_CARD_AND_NEXT]');
+let cardPickState = gameReducer(INITIAL_STATE, {
+  type: 'START_GAME',
+  config: INITIAL_CONFIG,
+  rawPlayers: [
+    { id: 'p1', name: 'Fatih', avatar: '🦎', score: 10 },
+    { id: 'p2', name: 'Aqil', avatar: '🐱', score: 8 },
+    { id: 'p3', name: 'Budi', avatar: '🐶', score: 5 },
+    { id: 'p4', name: 'Siti', avatar: '🐰', score: 4 },
+    { id: 'p5', name: 'Doni', avatar: '🦊', score: 2 },
+  ],
+});
+
+// Fatih picks Card #3 (idx 2)
+cardPickState = gameReducer(cardPickState, {
+  type: 'CLAIM_CARD_AND_NEXT',
+  cardIndex: 2,
+  playerName: 'Fatih',
+  playerId: 'p1',
+  score: 10,
+});
+assert(cardPickState.players[2].name === 'Fatih', 'Card 2 claimed by Fatih');
+assert(cardPickState.revealIndex === 1, 'revealIndex increments to 1');
+
+// Aqil picks Card #1 (idx 0)
+cardPickState = gameReducer(cardPickState, {
+  type: 'CLAIM_CARD_AND_NEXT',
+  cardIndex: 0,
+  playerName: 'Aqil',
+  playerId: 'p2',
+  score: 8,
+});
+assert(cardPickState.players[0].name === 'Aqil', 'Card 0 claimed by Aqil');
+
+// Budi picks Card #5 (idx 4)
+cardPickState = gameReducer(cardPickState, {
+  type: 'CLAIM_CARD_AND_NEXT',
+  cardIndex: 4,
+  playerName: 'Budi',
+  playerId: 'p3',
+  score: 5,
+});
+
+// Siti picks Card #2 (idx 1)
+cardPickState = gameReducer(cardPickState, {
+  type: 'CLAIM_CARD_AND_NEXT',
+  cardIndex: 1,
+  playerName: 'Siti',
+  playerId: 'p4',
+  score: 4,
+});
+
+// Doni picks Card #4 (idx 3)
+cardPickState = gameReducer(cardPickState, {
+  type: 'CLAIM_CARD_AND_NEXT',
+  cardIndex: 3,
+  playerName: 'Doni',
+  playerId: 'p5',
+  score: 2,
+});
+
+assert(cardPickState.phase === 'DESCRIPTION', 'All cards claimed transitions directly to DESCRIPTION phase');
+assert(cardPickState.speechOrderIds.length === 5, 'Speech order generated for all 5 claimed players');
+console.log('✅ PASSED: Arbitrary card picking and claiming flow functions smoothly!');
+
 console.log('\n========================================');
 console.log('🎉 ALL ENGINE VERIFICATION CHECKS PASSED!');
 console.log('========================================\n');

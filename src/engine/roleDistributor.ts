@@ -1,4 +1,5 @@
 import type { Role, SpecialRoleType, Player } from '../types/game';
+import { secureRandomFloat } from '../data/wordPairs';
 
 export interface RoleCounts {
   undercoverCount: number;
@@ -59,12 +60,12 @@ export function validateRoleCounts(
 }
 
 /**
- * Fisher-Yates shuffle array in place
+ * Fisher-Yates shuffle array with cryptographically secure random entropy
  */
 export function shuffleArray<T>(array: T[]): T[] {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(secureRandomFloat() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;

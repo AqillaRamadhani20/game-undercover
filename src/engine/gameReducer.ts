@@ -31,6 +31,15 @@ export type GameAction =
   | { type: 'UPDATE_PLAYER_NAME_BY_ID'; playerId: string; name: string }
   | { type: 'UPDATE_PLAYER_PROFILE'; index: number; name?: string; avatar?: string; avatarImage?: string }
   | { type: 'REROLL_WORDS' }
+  | { 
+      type: 'CLAIM_CARD_AND_NEXT'; 
+      cardIndex: number; 
+      playerName: string; 
+      avatar?: string; 
+      avatarImage?: string; 
+      playerId?: string;
+      score?: number;
+    }
   | { type: 'NEXT_ROUND' }
   | { type: 'REPLAY_GAME' }
   | { type: 'RESET_TO_LOBBY' };
@@ -258,6 +267,46 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         revealIndex: nextIndex,
+        isCardRevealed: false,
+      };
+    }
+
+    case 'CLAIM_CARD_AND_NEXT': {
+      const { cardIndex, playerName, avatar, avatarImage, playerId, score } = action;
+      const updatedPlayers = [...state.players];
+      if (updatedPlayers[cardIndex]) {
+        updatedPlayers[cardIndex] = {
+          ...updatedPlayers[cardIndex],
+          name: playerName.trim() || updatedPlayers[cardIndex].name,
+          id: playerId || updatedPlayers[cardIndex].id,
+          avatar: avatar || updatedPlayers[cardIndex].avatar,
+          avatarImage: avatarImage !== undefined ? avatarImage : updatedPlayers[cardIndex].avatarImage,
+          score: score !== undefined ? score : updatedPlayers[cardIndex].score,
+        };
+      }
+
+      const nextRevealIndex = state.revealIndex + 1;
+      if (nextRevealIndex >= updatedPlayers.length) {
+        const speechOrder = generateSpeechOrder(updatedPlayers, state.round);
+        return {
+          ...state,
+          phase: 'DESCRIPTION',
+          players: updatedPlayers,
+          speechOrderIds: speechOrder,
+          currentSpeakerIndex: 0,
+          revealIndex: 0,
+          isCardRevealed: false,
+          historyLog: [
+            ...state.historyLog,
+            'Semua pemain telah memilih kartu dan melihat kata rahasia. Memulai Fase Deskripsi Waktu!',
+          ],
+        };
+      }
+
+      return {
+        ...state,
+        players: updatedPlayers,
+        revealIndex: nextRevealIndex,
         isCardRevealed: false,
       };
     }

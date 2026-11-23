@@ -12,6 +12,7 @@ import {
   loadSavedConfig,
   saveConfig
 } from './utils/storage';
+import { calculateDefaultRoleCounts } from './engine/roleDistributor';
 import { getStoredPersonalWords, savePersonalWords } from './data/wordPairs';
 import type { PlayerProfile, GameConfig, WordPair } from './types/game';
 
@@ -55,10 +56,19 @@ export function App() {
     saveConfig(newConfig);
   };
 
-  // Sync player profiles to localStorage
+  // Sync player profiles to localStorage & keep config.playerCount synchronized
   const handleUpdateProfiles = (newProfiles: PlayerProfile[]) => {
     setProfiles(newProfiles);
     savePlayerProfiles(newProfiles);
+    if (newProfiles.length !== config.playerCount) {
+      const auto = calculateDefaultRoleCounts(newProfiles.length);
+      handleUpdateConfig({
+        ...config,
+        playerCount: newProfiles.length,
+        undercoverCount: auto.undercoverCount,
+        mrWhiteCount: auto.mrWhiteCount,
+      });
+    }
   };
 
   // Update a player's name by ID and keep profiles in sync
@@ -188,6 +198,47 @@ export function App() {
               }
             }}
             onRerollWords={() => dispatch({ type: 'REROLL_WORDS' })}
+            onClaimCard={(cardIndex, playerName, avatar, avatarImage, playerId, score) => {
+              dispatch({
+                type: 'CLAIM_CARD_AND_NEXT',
+                cardIndex,
+                playerName,
+                avatar,
+                avatarImage,
+                playerId,
+                score,
+              });
+              if (playerId) {
+                setProfiles(prev => {
+                  const updated = prev.map(p =>
+                    p.id === playerId
+                      ? {
+                          ...p,
+                          name: playerName,
+                          avatar: avatar || p.avatar,
+                          avatarImage: avatarImage !== undefined ? avatarImage : p.avatarImage,
+                        }
+                      : p
+                  );
+                  savePlayerProfiles(updated);
+                  return updated;
+                });
+              } else {
+                setProfiles(prev => {
+                  const updated = [...prev];
+                  if (updated[state.revealIndex]) {
+                    updated[state.revealIndex] = {
+                      ...updated[state.revealIndex],
+                      name: playerName,
+                      avatar: avatar || updated[state.revealIndex].avatar,
+                      avatarImage: avatarImage !== undefined ? avatarImage : updated[state.revealIndex].avatarImage,
+                    };
+                    savePlayerProfiles(updated);
+                  }
+                  return updated;
+                });
+              }
+            }}
           />
         )}
 
