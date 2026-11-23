@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Player, PlayerProfile } from '../../types/game';
-import { 
-  LogOut, 
-  Camera, 
-  Menu, 
+import {
+  LogOut,
+  Camera,
+  Menu,
   Check,
   RefreshCw,
   BookOpen,
@@ -13,7 +13,7 @@ import {
   Crown,
   Sparkles
 } from 'lucide-react';
-import { 
+import {
   InfiltratorHat,
   MysteryCardsHandGraphic
 } from '../common/UndercoverIcons';
@@ -41,11 +41,11 @@ interface WordRevealScreenProps {
   onUpdatePlayerProfile?: (updates: { name?: string; avatar?: string; avatarImage?: string }) => void;
   onRerollWords: () => void;
   onClaimCard?: (
-    cardIndex: number, 
-    playerName: string, 
-    avatar?: string, 
-    avatarImage?: string, 
-    playerId?: string, 
+    cardIndex: number,
+    playerName: string,
+    avatar?: string,
+    avatarImage?: string,
+    playerId?: string,
     score?: number
   ) => void;
 }
@@ -116,14 +116,14 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
   }, [playerIndex]);
 
   // Existing name in Replay ("Main Lagi") mode
-  const existingReplayName = isReplay 
+  const existingReplayName = isReplay
     ? (allPlayers?.[playerIndex]?.name?.trim() || savedProfiles?.[playerIndex]?.name?.trim() || '')
     : '';
 
   const cardCount = totalPlayers;
 
   // The secret role and word of the currently chosen card
-  const activeChosenPlayer = 
+  const activeChosenPlayer =
     selectedCardIdx !== null && allPlayers && allPlayers[selectedCardIdx]
       ? allPlayers[selectedCardIdx]
       : player;
@@ -356,8 +356,8 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
 
             if (claimed) {
               const displayName = claimed.name?.trim() || `Player ${claimed.playerNumber}`;
-              const initialLetter = claimed.name?.trim() 
-                ? claimed.name.trim().charAt(0).toUpperCase() 
+              const initialLetter = claimed.name?.trim()
+                ? claimed.name.trim().charAt(0).toUpperCase()
                 : `${claimed.playerNumber}`;
 
               return (
@@ -385,10 +385,10 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                   <div className="relative my-auto">
                     <div className="w-13 h-13 rounded-full overflow-hidden bg-emerald-500 border-2 border-emerald-300 flex items-center justify-center shadow-md">
                       {claimed.avatarImage ? (
-                        <img 
-                          src={claimed.avatarImage} 
-                          alt={displayName} 
-                          className="w-full h-full object-cover" 
+                        <img
+                          src={claimed.avatarImage}
+                          alt={displayName}
+                          className="w-full h-full object-cover"
                         />
                       ) : (
                         <span className="font-heading font-black text-xl text-white">
@@ -415,7 +415,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
               );
             }
 
-            {/* KARTU KUNING BERTANDA TANYA (?) */}
+            {/* KARTU KUNING BERTANDA TANYA (?) */ }
             return (
               <button
                 key={idx}
@@ -528,7 +528,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
       {isCardModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
           <div className="w-full max-w-xs rounded-3xl papan-glass-dark border border-white/20 p-6 shadow-2xl text-center space-y-4 animate-scale-up relative">
-            
+
             {/* Close X Button on Top-Right */}
             <button
               type="button"
@@ -547,16 +547,16 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
             {!isRevealed ? (
               <div className="space-y-4 pt-1">
                 {/* Circular Avatar: Green circle with boy silhouette & camera badge in bottom half */}
-                <div 
+                <div
                   onClick={() => fileInputRef.current?.click()}
                   title="Ketuk untuk ganti / unggah foto profil"
                   className="w-24 h-24 rounded-full bg-[#4ADE80] border-4 border-[#34D399]/40 relative overflow-hidden mx-auto shadow-xl cursor-pointer hover:brightness-105 btn-tactile group"
                 >
                   {modalAvatarImage ? (
-                    <img 
-                      src={modalAvatarImage} 
-                      alt="Profil" 
-                      className="w-full h-full object-cover" 
+                    <img
+                      src={modalAvatarImage}
+                      alt="Profil"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     <>
@@ -589,11 +589,10 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                     placeholder="Masukkan nama"
                     maxLength={16}
                     autoFocus
-                    className={`w-full px-4 py-3 rounded-2xl bg-[#0F172A]/90 border-2 text-white text-base font-bold text-center focus:outline-none font-heading shadow-inner placeholder:text-slate-500 transition-colors ${
-                      isDuplicateName 
-                        ? 'border-rose-500 focus:border-rose-400' 
-                        : 'border-slate-600 focus:border-[#38BDF8]'
-                    }`}
+                    className={`w-full px-4 py-3 rounded-2xl bg-[#0F172A]/90 border-2 text-white text-base font-bold text-center focus:outline-none font-heading shadow-inner placeholder:text-slate-500 transition-colors ${isDuplicateName
+                      ? 'border-rose-500 focus:border-rose-400'
+                      : 'border-slate-600 focus:border-[#38BDF8]'
+                      }`}
                   />
                   <p className="text-xs text-slate-300">
                     Masukkan nama untuk membuka kata rahasia
@@ -614,11 +613,10 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                       type="button"
                       onClick={handleOpenSecretWord}
                       disabled={!isNameValid}
-                      className={`w-full py-3.5 px-6 rounded-full font-black text-sm shadow-lg tracking-wide flex items-center justify-center gap-2 btn-tactile transition-all font-heading ${
-                        !isNameValid
-                          ? 'bg-slate-700/60 text-slate-400 cursor-not-allowed border border-slate-600'
-                          : 'bg-gradient-to-r from-[#10B981] to-[#34D399] hover:from-[#059669] hover:to-[#10B981] text-white cursor-pointer'
-                      }`}
+                      className={`w-full py-3.5 px-6 rounded-full font-black text-sm shadow-lg tracking-wide flex items-center justify-center gap-2 btn-tactile transition-all font-heading ${!isNameValid
+                        ? 'bg-slate-700/60 text-slate-400 cursor-not-allowed border border-slate-600'
+                        : 'bg-gradient-to-r from-[#10B981] to-[#34D399] hover:from-[#059669] hover:to-[#10B981] text-white cursor-pointer'
+                        }`}
                     >
                       <span>Buka Kata Rahasia</span>
                     </button>
@@ -643,10 +641,10 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                 {/* Center Circular Avatar with White Initial Letter (Image 4) */}
                 <div className="w-24 h-24 rounded-full bg-[#4ADE80] border-4 border-[#34D399]/40 flex items-center justify-center mx-auto shadow-xl overflow-hidden">
                   {modalAvatarImage ? (
-                    <img 
-                      src={modalAvatarImage} 
-                      alt={playerNameInput.trim()} 
-                      className="w-full h-full object-cover" 
+                    <img
+                      src={modalAvatarImage}
+                      alt={playerNameInput.trim()}
+                      className="w-full h-full object-cover"
                     />
                   ) : (
                     <span className="font-heading font-black text-4xl text-white">
@@ -739,11 +737,10 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                         setModalAvatarImage(p.avatarImage);
                         setIsImportModalOpen(false);
                       }}
-                      className={`w-full p-3 rounded-2xl flex items-center justify-between text-left transition-all btn-tactile ${
-                        isAlreadyClaimed
-                          ? 'bg-slate-900/40 opacity-40 cursor-not-allowed border border-slate-800'
-                          : 'bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700'
-                      }`}
+                      className={`w-full p-3 rounded-2xl flex items-center justify-between text-left transition-all btn-tactile ${isAlreadyClaimed
+                        ? 'bg-slate-900/40 opacity-40 cursor-not-allowed border border-slate-800'
+                        : 'bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700'
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-[#4ADE80] flex items-center justify-center text-white font-black text-sm font-heading overflow-hidden shadow-xs">
