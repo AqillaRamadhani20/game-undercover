@@ -12,8 +12,6 @@ import {
   X
 } from 'lucide-react';
 import { 
-  BoyCardSilhouette, 
-  GirlCardSilhouette, 
   InfiltratorHat 
 } from '../common/UndercoverIcons';
 import { soundEffects, triggerHaptic } from '../../utils/audio';
@@ -76,10 +74,11 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
   const [selectedCardIdx, setSelectedCardIdx] = useState<number | null>(null);
   const [isWordRevealedInModal, setIsWordRevealedInModal] = useState(false);
   const [modalAvatarImage, setModalAvatarImage] = useState<string | undefined>(undefined);
+  const [isEditingCustomName, setIsEditingCustomName] = useState(false);
 
   // Map of card index to claimed player identity
   const [claimedCardsMap, setClaimedCardsMap] = useState<
-    Record<number, { name: string; avatar: string; avatarImage?: string }>
+    Record<number, { name: string; avatar: string; avatarImage?: string; playerNumber: number }>
   >({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -93,10 +92,13 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
 
   // Determine current picker's known identity
   const currentPickerProfile = savedProfiles?.[playerIndex];
-  const pickerName = currentPickerProfile?.name?.trim() || '';
+  const pickerName = currentPickerProfile?.name?.trim() || allPlayers?.[playerIndex]?.name?.trim() || '';
+
+  // Determine next picker's name for button label
+  const nextPickerProfile = savedProfiles?.[playerIndex + 1];
+  const nextPickerName = nextPickerProfile?.name?.trim() || allPlayers?.[playerIndex + 1]?.name?.trim() || '';
 
   const cardCount = totalPlayers;
-  const isGirl = ((selectedCardIdx ?? playerIndex) % 2 === 1);
 
   // The secret role and word of the currently chosen card
   const activeChosenPlayer = 
@@ -117,6 +119,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     triggerHaptic('light');
     setSelectedCardIdx(idx);
     setIsWordRevealedInModal(false);
+    setIsEditingCustomName(false);
     // Prefill with pickerName if known, else start empty
     setPlayerNameInput(pickerName);
     setModalAvatarImage(currentPickerProfile?.avatarImage);
@@ -135,7 +138,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     soundEffects.playPop();
     triggerHaptic('light');
     if (selectedCardIdx !== null) {
-      const chosenName = playerNameInput.trim();
+      const chosenName = playerNameInput.trim() || pickerName || `Pemain ${playerIndex + 1}`;
       const chosenAvatar = currentPickerProfile?.avatar || '🦎';
       const chosenAvatarImage = modalAvatarImage || currentPickerProfile?.avatarImage;
       const chosenId = currentPickerProfile?.id;
@@ -148,6 +151,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
           name: chosenName,
           avatar: chosenAvatar,
           avatarImage: chosenAvatarImage,
+          playerNumber: playerIndex + 1,
         },
       }));
 
@@ -167,6 +171,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     setIsCardModalOpen(false);
     setSelectedCardIdx(null);
     setIsWordRevealedInModal(false);
+    setIsEditingCustomName(false);
     setModalAvatarImage(undefined);
   };
 
@@ -185,6 +190,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     setIsMenuOpen(false);
     setSelectedCardIdx(null);
     setIsWordRevealedInModal(false);
+    setIsEditingCustomName(false);
     setToastMessage('🎲 Pasangan kata baru berhasil dipilih!');
     setTimeout(() => setToastMessage(null), 3000);
   };
@@ -235,7 +241,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
         className="hidden"
       />
 
-      {/* ================= TOP HEADER (Dynamic Turn Caller) ================= */}
+      {/* ================= TOP HEADER (Dynamic Turn Announcement with Player Name) ================= */}
       <div className="flex items-center justify-between">
         {/* Exit Door Icon on Top-Left */}
         <button
@@ -252,33 +258,17 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
           <LogOut className="w-6 h-6 stroke-[2]" />
         </button>
 
-        {/* Center: Dynamic Turn Announcement */}
+        {/* Center: Dynamic Turn Caller (e.g. Pemain 1 (Fatih)) */}
         <div className="text-center">
-          {pickerName ? (
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-400/40 text-cyan-300 shadow-xs mb-0.5">
-                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                <span className="text-xs font-black uppercase tracking-wider font-heading">
-                  Giliran {pickerName}
-                </span>
-              </div>
-              <p className="text-[11px] font-bold text-slate-300">
-                Pilih salah satu kartu di meja
-              </p>
-            </div>
-          ) : (
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-sky-950/80 border border-sky-400/40 text-sky-300 shadow-xs mb-0.5">
-                <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse" />
-                <span className="text-xs font-black uppercase tracking-wider font-heading">
-                  Pemain #{playerIndex + 1}
-                </span>
-              </div>
-              <p className="text-[11px] font-bold text-slate-300">
-                Pilih kartu pilihanmu di meja
-              </p>
-            </div>
-          )}
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-cyan-950/90 border border-cyan-400/50 text-cyan-300 shadow-md mb-1">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+            <span className="text-xs font-black uppercase tracking-wider font-heading">
+              Pemain {playerIndex + 1}{pickerName ? ` (${pickerName})` : ''}
+            </span>
+          </div>
+          <p className="text-[11px] font-bold text-slate-300">
+            Pilih kartu kuning bertanda tanya (?)
+          </p>
         </div>
 
         {/* Help Question Mark on Top-Right */}
@@ -295,7 +285,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
         </button>
       </div>
 
-      {/* ================= INFO PILLS BAR (Screenshot 2 - Frosted Glass) ================= */}
+      {/* ================= INFO PILLS BAR (Penyusup & Total Pemain) ================= */}
       <div className="flex items-center justify-between gap-3 mt-3">
         {/* Left Pill: Penyusup tersisa */}
         <div className="flex-1 papan-glass rounded-2xl py-2 px-3.5 shadow-md">
@@ -327,41 +317,40 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
         </div>
       </div>
 
-      {/* ================= MYSTERY CARDS GRID (Choose Any Box/Card on the Table) ================= */}
+      {/* ================= MYSTERY CARDS GRID (Kartu Kuning Bertanda Tanya) ================= */}
       <div className="my-auto py-4">
         <div className="grid grid-cols-3 gap-3.5 max-h-[58vh] overflow-y-auto p-1">
           {Array.from({ length: cardCount }).map((_, idx) => {
             const claimed = claimedCardsMap[idx];
-            const isGirlCard = idx % 2 === 1;
 
             if (claimed) {
-              const displayName = claimed.name?.trim() || `Pemain ${idx + 1}`;
+              const displayName = claimed.name?.trim() || `Pemain ${claimed.playerNumber}`;
               const initialLetter = claimed.name?.trim() 
                 ? claimed.name.trim().charAt(0).toUpperCase() 
-                : `${idx + 1}`;
+                : `${claimed.playerNumber}`;
 
               return (
                 <div
                   key={idx}
                   onClick={() => {
                     soundEffects.playPop();
-                    setToastMessage(`🔒 Kartu #${idx + 1} sudah dikunci oleh ${displayName}!`);
+                    setToastMessage(`🔒 Kartu #${idx + 1} sudah dibuka oleh Pemain ${claimed.playerNumber} (${displayName})!`);
                     setTimeout(() => setToastMessage(null), 2200);
                   }}
                   className="relative aspect-[3/4] rounded-2xl p-2.5 flex flex-col items-center justify-between text-center papan-glass border-2 border-emerald-500/80 shadow-xl animate-flip cursor-pointer hover:border-emerald-400 transition-all btn-tactile select-none group"
                   title={`Kartu sudah dibuka oleh ${displayName}`}
                 >
-                  {/* Top Header: Badge Number & Check Pill */}
+                  {/* Top Header: Badge Player Number & Check Pill */}
                   <div className="w-full flex items-center justify-between px-0.5">
-                    <span className="text-[10px] font-black text-slate-400 font-heading">
-                      #{idx + 1}
+                    <span className="text-[10px] font-black text-emerald-400 font-heading">
+                      P{claimed.playerNumber}
                     </span>
                     <div className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
                       <Check className="w-3 h-3 stroke-[3]" />
                     </div>
                   </div>
 
-                  {/* Profile Avatar in Center with Glow */}
+                  {/* Profile Avatar in Center */}
                   <div className="relative my-auto">
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-800 border-2 border-emerald-400/90 flex items-center justify-center shadow-md">
                       {claimed.avatarImage ? (
@@ -395,26 +384,39 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
               );
             }
 
+            {/* KARTU KUNING BERTANDA TANYA (?) */}
             return (
               <button
                 key={idx}
                 type="button"
                 onClick={() => handleCardClick(idx)}
-                title={`Pilih Kartu #${idx + 1}`}
-                aria-label={`Pilih Kartu #${idx + 1}`}
-                className="relative aspect-[3/4] rounded-2xl flex flex-col items-center justify-center btn-tactile bg-amber-500 hover:bg-amber-400 border-2 border-amber-600 shadow-md cursor-pointer transition-transform hover:scale-105 active:scale-95 group"
+                title={`Pilih Kartu Kuning #${idx + 1}`}
+                aria-label={`Pilih Kartu Kuning #${idx + 1}`}
+                className="relative aspect-[3/4] rounded-2xl flex flex-col items-center justify-between p-3 btn-tactile bg-gradient-to-b from-amber-400 via-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 border-2 border-amber-600 shadow-xl cursor-pointer transition-all hover:scale-105 active:scale-95 group overflow-hidden"
               >
-                <span className="absolute top-2 left-2.5 text-[10px] font-black text-amber-900/60 font-heading">
-                  #{idx + 1}
-                </span>
-                {isGirlCard ? (
-                  <GirlCardSilhouette className="w-16 h-20 text-white drop-shadow-sm transition-transform group-hover:scale-110" />
-                ) : (
-                  <BoyCardSilhouette className="w-16 h-20 text-white drop-shadow-sm transition-transform group-hover:scale-110" />
-                )}
-                <span className="text-[10px] font-bold text-amber-950 mt-1 opacity-80">
-                  Ketuk Kartu
-                </span>
+                {/* Card Number on Top Left */}
+                <div className="w-full flex items-center justify-between">
+                  <span className="text-[11px] font-black text-amber-950/70 font-heading">
+                    #{idx + 1}
+                  </span>
+                  <span className="text-[9px] font-black text-amber-950/60 uppercase tracking-wider font-heading">
+                    Rahasia
+                  </span>
+                </div>
+
+                {/* Big Mystery Question Mark in Center */}
+                <div className="my-auto flex flex-col items-center justify-center">
+                  <span className="text-5xl font-black text-amber-950 font-heading drop-shadow-sm transition-transform group-hover:scale-115">
+                    ?
+                  </span>
+                </div>
+
+                {/* Bottom Prompt */}
+                <div className="w-full text-center">
+                  <span className="px-2 py-0.5 rounded-full bg-amber-600/30 text-[9px] font-extrabold text-amber-950 tracking-wide font-heading block">
+                    Ketuk Kartu
+                  </span>
+                </div>
               </button>
             );
           })}
@@ -500,7 +502,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                 </div>
                 <div>
                   <h4 className="text-sm font-black text-white">Panduan & Peran</h4>
-                  <p className="text-[11px] text-slate-300">Aturan Civilian, Undercover, Mr. White & Peran Khusus</p>
+                  <p className="text-[11px] text-slate-300">Aturan Civilian, Undercover & Mr. White</p>
                 </div>
               </button>
 
@@ -551,6 +553,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                 onClick={() => {
                   setIsCardModalOpen(false);
                   setIsWordRevealedInModal(false);
+                  setIsEditingCustomName(false);
                 }}
                 className="text-slate-400 hover:text-white p-1 rounded-full btn-tactile"
               >
@@ -558,7 +561,7 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
               </button>
             </div>
 
-            {/* Center Circular Green Avatar with Photo & Camera Upload Button */}
+            {/* Center Circular Avatar with Initials / Camera Upload Button */}
             <div className="relative inline-block mx-auto pt-1">
               <div 
                 onClick={() => fileInputRef.current?.click()}
@@ -569,14 +572,10 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                   <img src={modalAvatarImage} alt="Profil" className="w-full h-full object-cover" />
                 ) : currentPickerProfile?.avatarImage ? (
                   <img src={currentPickerProfile.avatarImage} alt="Profil" className="w-full h-full object-cover" />
-                ) : playerNameInput.trim() ? (
-                  <span className="font-heading font-black text-2xl text-white">
-                    {playerNameInput.trim().charAt(0).toUpperCase()}
-                  </span>
-                ) : isGirl ? (
-                  <GirlCardSilhouette className="w-12 h-14 text-white drop-shadow-sm mt-1" />
                 ) : (
-                  <BoyCardSilhouette className="w-12 h-14 text-white drop-shadow-sm mt-1" />
+                  <span className="font-heading font-black text-2xl text-white">
+                    {(playerNameInput.trim() || pickerName || `${playerIndex + 1}`).charAt(0).toUpperCase()}
+                  </span>
                 )}
               </div>
 
@@ -592,34 +591,60 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
               </button>
             </div>
 
-            {/* STAGE 1: Privacy Guard & Name Input (Mandatory Validation) */}
+            {/* STAGE 1: Known Player Direct Presentation (Or Name Input if Empty) */}
             {!isRevealed ? (
               <div className="space-y-4">
-                <div className="text-center space-y-2">
-                  <div className="space-y-1.5 max-w-xs mx-auto">
-                    <input
-                      type="text"
-                      value={playerNameInput}
-                      onChange={(e) => {
-                        setPlayerNameInput(e.target.value);
-                        // Clear custom profile photo when name is changed
-                        setModalAvatarImage(undefined);
-                      }}
-                      placeholder="Ketik namamu di sini..."
-                      maxLength={16}
-                      className={`w-full px-4 py-3 rounded-2xl bg-slate-900/90 border-2 text-white text-base font-bold text-center focus:outline-none font-heading shadow-inner placeholder:text-slate-500 transition-colors ${
-                        isDuplicateName 
-                          ? 'border-rose-500 focus:border-rose-400' 
-                          : 'border-slate-600 focus:border-cyan-400'
-                      }`}
-                    />
+                {/* Case A: Name is ALREADY known (Replay / Pre-set) */}
+                {pickerName && !isEditingCustomName ? (
+                  <div className="text-center space-y-1.5 py-1">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-950 border border-cyan-400/40 text-cyan-300 text-xs font-black font-heading">
+                      Pemain {playerIndex + 1}
+                    </div>
+                    <h3 className="text-2xl font-black text-white font-heading tracking-wide">
+                      {pickerName}
+                    </h3>
                     <p className="text-xs text-slate-300">
-                      Wajib isi nama unik sebelum membuka kata rahasia
+                      Kamu memilih <span className="font-bold text-amber-400">Kartu #{(selectedCardIdx ?? 0) + 1}</span>
                     </p>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingCustomName(true)}
+                      className="text-[11px] text-slate-400 hover:text-cyan-300 underline pt-1 inline-block"
+                    >
+                      Ubah nama?
+                    </button>
                   </div>
-                </div>
+                ) : (
+                  /* Case B: Name not yet filled (First time) or User toggled Edit */
+                  <div className="text-center space-y-2">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-sky-950 border border-sky-400/40 text-sky-300 text-xs font-black font-heading">
+                      Pemain {playerIndex + 1}
+                    </div>
+                    <div className="space-y-1.5 max-w-xs mx-auto">
+                      <input
+                        type="text"
+                        value={playerNameInput}
+                        onChange={(e) => {
+                          setPlayerNameInput(e.target.value);
+                          setModalAvatarImage(undefined);
+                        }}
+                        placeholder="Ketik namamu di sini..."
+                        maxLength={16}
+                        autoFocus
+                        className={`w-full px-4 py-3 rounded-2xl bg-slate-900/90 border-2 text-white text-base font-bold text-center focus:outline-none font-heading shadow-inner placeholder:text-slate-500 transition-colors ${
+                          isDuplicateName 
+                            ? 'border-rose-500 focus:border-rose-400' 
+                            : 'border-slate-600 focus:border-cyan-400'
+                        }`}
+                      />
+                      <p className="text-xs text-slate-300">
+                        Wajib isi nama sebelum membuka kata rahasia
+                      </p>
+                    </div>
+                  </div>
+                )}
 
-                {/* Primary Button: STRICT VALIDATION - Disabled if name is empty or duplicate */}
+                {/* Primary Button: STRICT VALIDATION */}
                 <div className="space-y-2 pt-1">
                   <button
                     type="button"
@@ -683,15 +708,17 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                   </div>
                 )}
 
-                {/* Sembunyikan & Oper Button (Solid Emerald) */}
+                {/* Selesai & Oper ke Pemain Berikutnya Button */}
                 <button
                   type="button"
                   onClick={handleFinishAndClaim}
-                  className="w-full py-4 px-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-base shadow-md tracking-wide flex items-center justify-center gap-2 btn-tactile font-heading"
+                  className="w-full py-4 px-6 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-sm shadow-md tracking-wide flex items-center justify-center gap-2 btn-tactile font-heading"
                 >
                   <EyeOff className="w-5 h-5" />
                   <span>
-                    {playerIndex === totalPlayers - 1 ? 'Selesai & Masuk Deskripsi Waktu' : 'Selesai & Oper HP'}
+                    {playerIndex === totalPlayers - 1 
+                      ? 'Selesai & Masuk Deskripsi Waktu' 
+                      : `Selesai & Oper ke Pemain ${playerIndex + 2}${nextPickerName ? ` (${nextPickerName})` : ''}`}
                   </span>
                 </button>
               </div>
