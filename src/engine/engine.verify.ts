@@ -326,6 +326,30 @@ assert(cardPickState.phase === 'DESCRIPTION', 'All cards claimed transitions dir
 assert(cardPickState.speechOrderIds.length === 5, 'Speech order generated for all 5 claimed players');
 console.log('✅ PASSED: Arbitrary card picking and claiming flow functions smoothly!');
 
+// 11. IN-GAME PLAYER ADD & REMOVE (IMAGE 6)
+console.log('\n[11. In-Game Player Add & Remove (Image 6 Flow)]');
+// Remove Doni (p5)
+let modState = gameReducer(cardPickState, {
+  type: 'REMOVE_PLAYER_IN_GAME',
+  playerId: 'p5',
+});
+assert(modState.players.length === 4, 'Players count reduced to 4 after remove');
+assert(!modState.players.some(p => p.id === 'p5'), 'Removed player no longer in players list');
+assert(!modState.speechOrderIds.includes('p5'), 'Removed player no longer in speechOrderIds');
+console.log('✅ PASSED: REMOVE_PLAYER_IN_GAME successfully removes player from game and speech order!');
+
+// Add new player "Zaki"
+modState = gameReducer(modState, {
+  type: 'ADD_PLAYER_IN_GAME',
+  name: 'Zaki',
+});
+assert(modState.players.length === 5, 'Players count increased back to 5 after add');
+const addedPlayer = modState.players.find(p => p.name === 'Zaki');
+assert(Boolean(addedPlayer), 'New player Zaki exists in players list');
+assert(addedPlayer?.role === 'CIVILIAN', 'New player default role is CIVILIAN');
+assert(modState.speechOrderIds.includes(addedPlayer!.id), 'New player added to speechOrderIds');
+console.log('✅ PASSED: ADD_PLAYER_IN_GAME successfully adds new player to game with civilian role!');
+
 console.log('\n========================================');
 console.log('🎉 ALL ENGINE VERIFICATION CHECKS PASSED!');
 console.log('========================================\n');

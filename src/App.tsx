@@ -250,6 +250,8 @@ export function App() {
             onOpenScoreboard={() => setIsScoreboardOpen(true)}
             onRerollWords={() => dispatch({ type: 'REROLL_WORDS' })}
             onUpdatePlayerNameById={handleUpdatePlayerNameById}
+            onDeletePlayer={(playerId) => dispatch({ type: 'REMOVE_PLAYER_IN_GAME', playerId })}
+            onAddPlayer={(name) => dispatch({ type: 'ADD_PLAYER_IN_GAME', name })}
           />
         )}
 

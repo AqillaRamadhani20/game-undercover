@@ -40,6 +40,8 @@ export type GameAction =
       playerId?: string;
       score?: number;
     }
+  | { type: 'REMOVE_PLAYER_IN_GAME'; playerId: string }
+  | { type: 'ADD_PLAYER_IN_GAME'; name: string }
   | { type: 'NEXT_ROUND' }
   | { type: 'REPLAY_GAME' }
   | { type: 'RESET_TO_LOBBY' };
@@ -308,6 +310,41 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         players: updatedPlayers,
         revealIndex: nextRevealIndex,
         isCardRevealed: false,
+      };
+    }
+
+    case 'REMOVE_PLAYER_IN_GAME': {
+      const { playerId } = action;
+      const updatedPlayers = state.players.filter(p => p.id !== playerId);
+      const updatedSpeechOrder = state.speechOrderIds.filter(id => id !== playerId);
+      return {
+        ...state,
+        players: updatedPlayers,
+        speechOrderIds: updatedSpeechOrder,
+        historyLog: [...state.historyLog, 'Pemain dihapus dari permainan.'],
+      };
+    }
+
+    case 'ADD_PLAYER_IN_GAME': {
+      const { name } = action;
+      const newId = `player-added-${Date.now()}`;
+      const newPlayer: Player = {
+        id: newId,
+        name: name.trim(),
+        avatar: '👤',
+        role: 'CIVILIAN',
+        specialRole: null,
+        word: state.activeWordPair?.civilianWord || '',
+        isAlive: true,
+        score: 0,
+      };
+      const updatedPlayers = [...state.players, newPlayer];
+      const updatedSpeechOrder = [...state.speechOrderIds, newId];
+      return {
+        ...state,
+        players: updatedPlayers,
+        speechOrderIds: updatedSpeechOrder,
+        historyLog: [...state.historyLog, `Pemain baru (${name.trim()}) ditambahkan ke permainan.`],
       };
     }
 

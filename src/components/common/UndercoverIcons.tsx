@@ -125,3 +125,72 @@ export const MemeSilhouette: React.FC<{ className?: string; active?: boolean }> 
     <path d="M 6 21 C 6 17, 9 15, 12 15 C 15 15, 18 17, 18 21 Z" opacity="0.6" />
   </svg>
 );
+
+// Two Mystery Cards with Boy & Girl Silhouettes and Pointing Hand (Original Undercover Style)
+export const MysteryCardsHandGraphic: React.FC<{ className?: string }> = ({ className = "w-52 h-40" }) => (
+  <svg viewBox="0 0 240 180" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="cardYellowLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#FCD34D" />
+        <stop offset="60%" stopColor="#F59E0B" />
+        <stop offset="100%" stopColor="#D97706" />
+      </linearGradient>
+      <linearGradient id="cardYellowRight" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#FDE68A" />
+        <stop offset="50%" stopColor="#FBBF24" />
+        <stop offset="100%" stopColor="#D97706" />
+      </linearGradient>
+      <filter id="handShadowFilter" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="3" dy="6" stdDeviation="4" floodOpacity="0.45" floodColor="#000000" />
+      </filter>
+      <filter id="cardShadowFilter" x="-15%" y="-15%" width="130%" height="130%">
+        <feDropShadow dx="0" dy="6" stdDeviation="5" floodOpacity="0.35" floodColor="#000000" />
+      </filter>
+    </defs>
+
+    {/* Left Card: Boy Silhouette (Tilted Left) */}
+    <g transform="translate(34, 22) rotate(-8 45 60)" filter="url(#cardShadowFilter)">
+      <rect width="84" height="112" rx="14" fill="url(#cardYellowLeft)" stroke="#B45309" strokeWidth="1.5" />
+      {/* Boy silhouette in solid white */}
+      <path 
+        d="M42 22 C32 22 25 29 25 38 C25 46 29 50 32 53 C29 56 25 61 24 66 C23 70 26 74 30 76 C31 80 30 87 27 92 L57 92 C54 87 53 80 54 76 C58 74 61 70 60 66 C59 61 55 56 52 53 C55 50 59 46 59 38 C59 29 52 22 42 22 Z" 
+        fill="#FFFFFF" 
+      />
+      {/* Boy spiky hair */}
+      <path d="M25 36 L16 38 L24 45 Z" fill="#FFFFFF" />
+      {/* Cutout Yellow Question Mark */}
+      <text x="42" y="60" textAnchor="middle" fill="#D97706" fontSize="26" fontWeight="900" fontFamily="sans-serif">
+        ?
+      </text>
+    </g>
+
+    {/* Right Card: Girl Silhouette (Tilted Right) */}
+    <g transform="translate(118, 20) rotate(8 45 60)" filter="url(#cardShadowFilter)">
+      <rect width="84" height="112" rx="14" fill="url(#cardYellowRight)" stroke="#B45309" strokeWidth="1.5" />
+      {/* Girl silhouette in solid white */}
+      <path 
+        d="M42 22 C31 22 23 31 23 42 C21 54 20 66 25 72 C27 75 29 76 32 76 C33 80 32 87 29 92 L55 92 C52 87 51 80 52 76 C55 76 57 75 59 72 C64 66 63 54 61 42 C61 31 53 22 42 22 Z" 
+        fill="#FFFFFF" 
+      />
+      {/* Cutout Yellow Question Mark */}
+      <text x="42" y="58" textAnchor="middle" fill="#D97706" fontSize="26" fontWeight="900" fontFamily="sans-serif">
+        ?
+      </text>
+    </g>
+
+    {/* Pointing Hand tapping right card */}
+    <g transform="translate(112, 68)" filter="url(#handShadowFilter)">
+      {/* Hand path */}
+      <path 
+        d="M28 14 C28 8 32 4 38 6 C43 8 46 15 45 26 L44 48 C46 45 49 42 54 44 C58 45 59 49 58 53 L57 60 C59 58 63 57 66 59 C69 61 69 65 67 69 L64 75 C66 74 69 75 70 78 C71 82 69 86 66 89 L56 102 C49 110 40 114 30 114 L12 114 C5 114 0 107 2 101 L10 81 C11 77 11 72 10 68 L24 40 L28 14 Z" 
+        fill="#FFFFFF" 
+        stroke="#CBD5E1" 
+        strokeWidth="2"
+      />
+      {/* Finger joint lines */}
+      <path d="M37 48 C41 47 44 48 45 50" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" />
+      <path d="M49 60 C53 59 56 60 57 62" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" />
+      <path d="M57 72 C61 71 64 72 65 74" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" />
+    </g>
+  </svg>
+);

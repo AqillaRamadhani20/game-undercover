@@ -17,9 +17,8 @@ import {
   Check, 
   X,
   Lock,
-  Crown,
-  Sparkles,
-  Pencil
+  Pencil,
+  Trash2
 } from 'lucide-react';
 import { InfiltratorHat } from '../common/UndercoverIcons';
 import { soundEffects, triggerHaptic } from '../../utils/audio';
@@ -37,6 +36,8 @@ interface DescriptionScreenProps {
   onOpenScoreboard: () => void;
   onRerollWords: () => void;
   onUpdatePlayerNameById?: (playerId: string, name: string) => void;
+  onDeletePlayer?: (playerId: string) => void;
+  onAddPlayer?: (name: string) => void;
 }
 
 const CIRCLE_COLORS = [
@@ -55,7 +56,7 @@ const CIRCLE_COLORS = [
 export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
   round: _round,
   players,
-  profiles = [],
+  profiles: _profiles = [],
   speechOrderIds,
   undercoverCount: _undercoverCount,
   mrWhiteCount: _mrWhiteCount,
@@ -65,6 +66,8 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
   onOpenScoreboard,
   onRerollWords,
   onUpdatePlayerNameById,
+  onDeletePlayer,
+  onAddPlayer,
 }) => {
   // Menu Sheet State
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -73,6 +76,43 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
   // Edit Player Name State
   const [editingPlayer, setEditingPlayer] = useState<{ id: string; name: string } | null>(null);
   const [editingNameInput, setEditingNameInput] = useState('');
+
+  // Delete & Add Player Handlers
+  const handleDeletePlayer = (playerId: string, playerName: string) => {
+    if (players.length <= 3) {
+      alert('Minimal 3 pemain untuk bermain!');
+      return;
+    }
+    const confirmDelete = window.confirm(`Hapus pemain "${playerName}" dari permainan?`);
+    if (!confirmDelete) return;
+
+    soundEffects.playPop();
+    triggerHaptic('medium');
+    if (onDeletePlayer) {
+      onDeletePlayer(playerId);
+      setToastMessage(`Pemain ${playerName} berhasil dihapus`);
+      setTimeout(() => setToastMessage(null), 2500);
+    }
+  };
+
+  const handleAddNewPlayer = () => {
+    const newName = window.prompt('Masukkan nama pemain baru:');
+    if (!newName || !newName.trim()) return;
+
+    // Check duplicate
+    if (players.some(p => p.name.trim().toLowerCase() === newName.trim().toLowerCase())) {
+      alert(`Nama "${newName.trim()}" sudah digunakan! Gunakan nama berbeda.`);
+      return;
+    }
+
+    soundEffects.playPop();
+    triggerHaptic('medium');
+    if (onAddPlayer) {
+      onAddPlayer(newName.trim());
+      setToastMessage(`Pemain ${newName.trim()} berhasil ditambahkan!`);
+      setTimeout(() => setToastMessage(null), 2500);
+    }
+  };
 
   // Timer State
   const [timerSeconds, setTimerSeconds] = useState(60);
@@ -592,167 +632,137 @@ export const DescriptionScreen: React.FC<DescriptionScreenProps> = ({
         </div>
       )}
 
-      {/* ================= SUB-MODAL 3: DAFTAR PEMAIN & PAPAN PERINGKAT ================= */}
-      {activeSubModal === 'PLAYERS' && (() => {
-        // Sort players by score descending to determine rankings
-        const rankedPlayers = [...players].map(p => {
-          const prof = profiles?.find(pr => pr.id === p.id);
-          const score = (prof?.totalScore !== undefined && prof.totalScore > 0) ? prof.totalScore : (p.score ?? 0);
-          return { ...p, score };
-        }).sort((a, b) => {
-          if (b.score !== a.score) return b.score - a.score;
-          if (a.isAlive !== b.isAlive) return a.isAlive ? -1 : 1;
-          return a.name.localeCompare(b.name);
-        });
+      {/* ================= SUB-MODAL 3: DAFTAR PEMAIN (IMAGE 6) ================= */}
+      {activeSubModal === 'PLAYERS' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in">
+          <div className="papan-glass-dark border border-white/20 rounded-3xl p-6 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl">
+            {/* Header: Daftar pemain */}
+            <h3 className="text-2xl font-black text-white font-heading text-center tracking-wide">
+              Daftar pemain
+            </h3>
 
-        return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-            <div className="papan-glass-dark rounded-3xl p-5 max-w-sm w-full space-y-4 animate-scale-up shadow-2xl border border-white/10">
-              {/* Header Showcase with Crown */}
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500/25 to-yellow-400/20 text-amber-400 border border-amber-400/40 flex items-center justify-center shrink-0 shadow-md">
-                    <Crown className="w-6 h-6 fill-amber-400/30 text-amber-300" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-black text-white font-heading flex items-center gap-1.5">
-                      <span>Papan Peringkat</span>
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    </h3>
-                    <p className="text-[11px] text-slate-300">
-                      {players.length} Pemain • Skor & Prestasi
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveSubModal(null)}
-                  className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center btn-tactile"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+            {/* Top White Role Capsule: Civilian, Undercover, Mr. White + Pencil Button */}
+            <div className="bg-white rounded-full py-2 px-5 flex items-center justify-between shadow-lg max-w-[240px] mx-auto text-slate-900">
+              {/* Civilian: Blue silhouette */}
+              <div className="flex flex-col items-center">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#38BDF8]">
+                  <path d="M12 2C8.69 2 6 4.69 6 8c0 2.21 1.2 4.15 3 5.19V14c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-.81c1.8-1.04 3-2.98 3-5.19 0-3.31-2.69-6-6-6z" />
+                  <path d="M4 22c0-3.31 3.58-6 8-6s8 2.69 8 6v1H4v-1z" />
+                </svg>
+                <span className="text-xs font-black text-slate-900 leading-tight mt-0.5">
+                  {aliveCivilianCount}
+                </span>
               </div>
 
-              {/* Player Ranking List */}
-              <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
-                {rankedPlayers.map((p, idx) => {
-                  const rank = idx + 1;
-                  return (
-                    <div
-                      key={p.id}
-                      className={`relative flex items-center justify-between p-3 rounded-2xl border transition-all ${
-                        rank === 1
-                          ? 'papan-glass border-amber-400/80 bg-amber-500/10 shadow-[0_4px_20px_rgba(245,158,11,0.2)]'
-                          : rank === 2
-                          ? 'papan-glass border-slate-300/50 bg-slate-300/10 shadow-sm'
-                          : rank === 3
-                          ? 'papan-glass border-amber-700/50 bg-amber-800/10 shadow-sm'
-                          : 'papan-glass border-white/5'
-                      } ${!p.isAlive ? 'opacity-65' : ''}`}
+              {/* Undercover: Black infiltrator hat */}
+              <div className="flex flex-col items-center">
+                <InfiltratorHat isWhite={false} className="w-5 h-5" />
+                <span className="text-xs font-black text-slate-900 leading-tight mt-0.5">
+                  {aliveUndercoverCount}
+                </span>
+              </div>
+
+              {/* Mr. White: White infiltrator hat */}
+              <div className="flex flex-col items-center">
+                <InfiltratorHat isWhite={true} className="w-5 h-5 filter drop-shadow-xs" />
+                <span className="text-xs font-black text-slate-900 leading-tight mt-0.5">
+                  {aliveMrWhiteCount}
+                </span>
+              </div>
+
+              {/* Pencil icon circle button */}
+              <button
+                type="button"
+                onClick={() => {
+                  soundEffects.playClick();
+                  setToastMessage(`Peran: ${aliveCivilianCount} Civilian, ${aliveUndercoverCount} Undercover, ${aliveMrWhiteCount} Mr. White`);
+                  setTimeout(() => setToastMessage(null), 3000);
+                }}
+                title="Info Komposisi Peran"
+                className="w-7 h-7 rounded-full bg-slate-600 hover:bg-slate-500 text-white flex items-center justify-center shadow-xs btn-tactile"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* "+ Tambahkan pemain" Row (Pink Circle Button + Text) */}
+            <button
+              type="button"
+              onClick={handleAddNewPlayer}
+              className="flex items-center gap-3 w-full px-2 py-1 hover:opacity-90 transition-opacity btn-tactile text-left"
+            >
+              <div className="w-9 h-9 rounded-full bg-[#FB7185] hover:bg-[#F43F5E] text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                +
+              </div>
+              <span className="text-white text-sm font-bold font-heading">
+                Tambahkan pemain
+              </span>
+            </button>
+
+            {/* Player List Rows (Trash icon, Avatar, Green Pill Name, Score 0 PN) */}
+            <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+              {players.map((p, idx) => {
+                const circleColor = CIRCLE_COLORS[idx % CIRCLE_COLORS.length];
+                const initial = (p.name.trim() || `P${idx + 1}`).charAt(0).toUpperCase();
+                const score = p.score ?? 0;
+
+                return (
+                  <div key={p.id} className="flex items-center justify-between gap-3">
+                    {/* Trash Icon Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleDeletePlayer(p.id, p.name)}
+                      title={`Hapus ${p.name}`}
+                      className="text-slate-400 hover:text-rose-400 p-1 btn-tactile transition-colors shrink-0"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        {/* Rank Badge & Crown */}
-                        <div className="shrink-0 flex items-center justify-center w-8">
-                          {rank === 1 ? (
-                            <div className="flex flex-col items-center">
-                              <Crown className="w-5 h-5 text-amber-300 fill-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
-                              <span className="text-[10px] font-black text-amber-300 font-heading">#1</span>
-                            </div>
-                          ) : rank === 2 ? (
-                            <div className="flex flex-col items-center">
-                              <Crown className="w-4 h-4 text-slate-200 fill-slate-300/60" />
-                              <span className="text-[10px] font-black text-slate-200 font-heading">#2</span>
-                            </div>
-                          ) : rank === 3 ? (
-                            <div className="flex flex-col items-center">
-                              <Crown className="w-4 h-4 text-amber-600 fill-amber-700/60" />
-                              <span className="text-[10px] font-black text-amber-400 font-heading">#3</span>
-                            </div>
-                          ) : (
-                            <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs font-heading">
-                              #{rank}
-                            </div>
-                          )}
-                        </div>
+                      <Trash2 className="w-5 h-5 stroke-[2]" />
+                    </button>
 
-                        {/* Profile Avatar with Decorative Ring */}
-                        <div className="relative shrink-0">
-                          <div className={`w-10 h-10 rounded-full overflow-hidden bg-slate-800 flex items-center justify-center text-sm font-bold shadow-md ${
-                            rank === 1
-                              ? 'border-2 border-amber-400 ring-2 ring-amber-400/30'
-                              : rank === 2
-                              ? 'border-2 border-slate-300'
-                              : rank === 3
-                              ? 'border-2 border-amber-700'
-                              : 'border border-white/10'
-                          }`}>
-                            {p.avatarImage ? (
-                              <img src={p.avatarImage} alt={p.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <span className={`font-heading font-black ${
-                                rank === 1 ? 'text-amber-300' : rank === 2 ? 'text-slate-200' : rank === 3 ? 'text-amber-400' : 'text-white'
-                              }`}>
-                                {(p.name.trim() || `P${rank}`).charAt(0).toUpperCase()}
-                              </span>
-                            )}
-                          </div>
-                          {rank === 1 && (
-                            <div className="absolute -top-1.5 -right-1 text-xs select-none">
-                              ✨
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Name, Status & Quick Edit Pencil */}
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <p className="text-xs font-black text-white font-heading truncate">
-                              {p.name.trim() || `Pemain ${rank}`}
-                            </p>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                soundEffects.playClick();
-                                setEditingPlayer({ id: p.id, name: p.name });
-                                setEditingNameInput(p.name);
-                              }}
-                              title="Ubah Nama Pemain"
-                              className="p-1 rounded text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition-colors btn-tactile"
-                            >
-                              <Pencil className="w-3 h-3" />
-                            </button>
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            {p.isAlive ? (
-                              <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                                Bertahan
-                              </span>
-                            ) : (
-                              <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                                Tersingkir
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Score on Right */}
-                      <div className="text-right shrink-0 pl-2 font-heading">
-                        <span className={`text-lg font-black ${
-                          rank === 1 ? 'text-amber-400' : rank === 2 ? 'text-slate-200' : rank === 3 ? 'text-amber-500' : 'text-slate-300'
-                        }`}>
-                          {p.score}
-                        </span>
-                        <span className="text-[10px] font-bold text-slate-400 ml-1">pts</span>
-                      </div>
+                    {/* Circular Avatar with Initial Letter */}
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm font-heading shrink-0 shadow-md overflow-hidden ${circleColor}`}>
+                      {p.avatarImage ? (
+                        <img src={p.avatarImage} alt={p.name} className="w-full h-full object-cover" />
+                      ) : (
+                        initial
+                      )}
                     </div>
-                  );
-                })}
-              </div>
+
+                    {/* Green Rounded Pill with Player Name */}
+                    <div className="bg-[#4ADE80] text-white font-bold text-xs px-4 py-2 rounded-full flex-1 max-w-[170px] truncate text-left shadow-xs">
+                      {p.name.trim() || `Pemain ${idx + 1}`}
+                    </div>
+
+                    {/* Score on Right: Number and "PN" */}
+                    <div className="text-right shrink-0 min-w-[32px] font-heading">
+                      <span className="text-sm font-black text-white block leading-tight">
+                        {score}
+                      </span>
+                      <span className="text-[9px] font-bold text-slate-400 block leading-tight">
+                        PN
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Bottom Circular Cyan Check Button (Image 6) */}
+            <div className="pt-2 flex justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  soundEffects.playPop();
+                  setActiveSubModal(null);
+                }}
+                className="w-14 h-14 rounded-full bg-[#38BDF8] hover:bg-[#0EA5E9] text-white flex items-center justify-center shadow-xl border-2 border-white/20 btn-tactile"
+                aria-label="Tutup Daftar Pemain"
+              >
+                <Check className="w-8 h-8 stroke-[3]" />
+              </button>
             </div>
           </div>
-        );
-      })()}
+        </div>
+      )}
 
       {/* ================= SUB-MODAL 4: PENGATURAN ================= */}
       {activeSubModal === 'SETTINGS' && (
