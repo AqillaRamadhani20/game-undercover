@@ -1056,15 +1056,14 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                   return (
                     <div
                       key={p.id || idx}
-                      className={`relative flex items-center justify-between p-3 rounded-2xl border transition-all ${
-                        rank === 1
-                          ? 'papan-glass border-amber-400/80 bg-amber-500/10 shadow-[0_4px_20px_rgba(245,158,11,0.2)]'
-                          : rank === 2
+                      className={`relative flex items-center justify-between p-3 rounded-2xl border transition-all ${rank === 1
+                        ? 'papan-glass border-amber-400/80 bg-amber-500/10 shadow-[0_4px_20px_rgba(245,158,11,0.2)]'
+                        : rank === 2
                           ? 'papan-glass border-slate-300/50 bg-slate-300/10 shadow-sm'
                           : rank === 3
-                          ? 'papan-glass border-amber-700/50 bg-amber-800/10 shadow-sm'
-                          : 'papan-glass border-white/5'
-                      }`}
+                            ? 'papan-glass border-amber-700/50 bg-amber-800/10 shadow-sm'
+                            : 'papan-glass border-white/5'
+                        }`}
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="shrink-0 flex items-center justify-center w-8">
@@ -1094,9 +1093,8 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                           {p.avatarImage ? (
                             <img src={p.avatarImage} alt={p.name} className="w-full h-full object-cover" />
                           ) : (
-                            <span className={`font-heading font-black ${
-                              rank === 1 ? 'text-amber-300' : rank === 2 ? 'text-slate-200' : rank === 3 ? 'text-amber-400' : 'text-white'
-                            }`}>
+                            <span className={`font-heading font-black ${rank === 1 ? 'text-amber-300' : rank === 2 ? 'text-slate-200' : rank === 3 ? 'text-amber-400' : 'text-white'
+                              }`}>
                               {(p.name.trim() || `P${rank}`).charAt(0).toUpperCase()}
                             </span>
                           )}
@@ -1110,9 +1108,8 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                       </div>
 
                       <div className="text-right shrink-0 pl-2 font-heading">
-                        <span className={`text-lg font-black ${
-                          rank === 1 ? 'text-amber-400' : rank === 2 ? 'text-slate-200' : rank === 3 ? 'text-amber-500' : 'text-slate-300'
-                        }`}>
+                        <span className={`text-lg font-black ${rank === 1 ? 'text-amber-400' : rank === 2 ? 'text-slate-200' : rank === 3 ? 'text-amber-500' : 'text-slate-300'
+                          }`}>
                           {p.score ?? 0}
                         </span>
                         <span className="text-[10px] font-bold text-slate-400 ml-1">pts</span>
