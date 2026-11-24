@@ -23,5 +23,5 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
-  "exclude": ["src/**/*.verify.ts"]
+  "exclude": ["src/**/*.verify.ts", "src/**/*.test.ts"]
 }
