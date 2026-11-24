@@ -27,11 +27,20 @@ export function loadSavedProfiles(): PlayerProfile[] {
     if (!raw) return DEFAULT_PLAYER_PROFILES;
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length >= 3) {
-      // Clear out legacy dummy names (Budi, Siti, etc.) so names start fresh and empty
-      return parsed.map(p => ({
-        ...p,
-        name: DUMMY_NAMES.includes(p.name) ? '' : p.name,
-      }));
+      // Ensure strictly unique IDs and clear legacy dummy names
+      const seenIds = new Set<string>();
+      return parsed.map((p, idx) => {
+        let uniqueId = p.id;
+        if (!uniqueId || seenIds.has(uniqueId)) {
+          uniqueId = `p-${idx + 1}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+        }
+        seenIds.add(uniqueId);
+        return {
+          ...p,
+          id: uniqueId,
+          name: DUMMY_NAMES.includes(p.name) ? '' : (p.name || ''),
+        };
+      });
     }
     return DEFAULT_PLAYER_PROFILES;
   } catch {

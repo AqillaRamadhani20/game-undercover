@@ -41,7 +41,7 @@ export type GameAction =
       score?: number;
     }
   | { type: 'REMOVE_PLAYER_IN_GAME'; playerId: string }
-  | { type: 'ADD_PLAYER_IN_GAME'; name: string }
+  | { type: 'ADD_PLAYER_IN_GAME'; name: string; newId?: string }
   | { type: 'NEXT_ROUND' }
   | { type: 'REPLAY_GAME' }
   | { type: 'RESET_TO_LOBBY' };
@@ -284,7 +284,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           name: playerName.trim() || updatedPlayers[cardIndex].name,
           id: playerId || updatedPlayers[cardIndex].id,
           avatar: avatar || updatedPlayers[cardIndex].avatar,
-          avatarImage: avatarImage !== undefined ? avatarImage : updatedPlayers[cardIndex].avatarImage,
+          avatarImage: avatarImage,
           score: score !== undefined ? score : updatedPlayers[cardIndex].score,
         };
       }
@@ -328,10 +328,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'ADD_PLAYER_IN_GAME': {
-      const { name } = action;
-      const newId = `player-added-${Date.now()}`;
+      const { name, newId } = action;
+      const assignedId = newId || `player-added-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
       const newPlayer: Player = {
-        id: newId,
+        id: assignedId,
         name: name.trim(),
         avatar: '👤',
         role: 'CIVILIAN',
@@ -341,7 +341,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         score: 0,
       };
       const updatedPlayers = [...state.players, newPlayer];
-      const updatedSpeechOrder = [...state.speechOrderIds, newId];
+      const updatedSpeechOrder = [...state.speechOrderIds, assignedId];
       return {
         ...state,
         players: updatedPlayers,

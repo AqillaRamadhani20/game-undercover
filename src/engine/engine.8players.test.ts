@@ -100,29 +100,45 @@ console.log('✅ PASSED: Roles and secret words correctly distributed across 8 p
 console.log('\n[STEP 3: 8 Players Choosing & Claiming Mystery Cards]');
 
 // 8 players pick cards in arbitrary order:
+// Player 1 uploads a custom photo; other players do not.
+const fatihPhoto = 'data:image/png;base64,sampleFatihPhotoData';
 const cardPicks = [
-  { playerIdx: 0, cardIdx: 6, name: 'Fatih' },
-  { playerIdx: 1, cardIdx: 1, name: 'Aqil' },
-  { playerIdx: 2, cardIdx: 4, name: 'Budi' },
-  { playerIdx: 3, cardIdx: 7, name: 'Citra' },
-  { playerIdx: 4, cardIdx: 0, name: 'Doni' },
-  { playerIdx: 5, cardIdx: 3, name: 'Eka' },
-  { playerIdx: 6, cardIdx: 5, name: 'Gani' },
-  { playerIdx: 7, cardIdx: 2, name: 'Hana' },
+  { playerIdx: 0, cardIdx: 6, name: 'Fatih', avatarImage: fatihPhoto },
+  { playerIdx: 1, cardIdx: 1, name: 'Aqil', avatarImage: undefined },
+  { playerIdx: 2, cardIdx: 4, name: 'Budi', avatarImage: undefined },
+  { playerIdx: 3, cardIdx: 7, name: 'Citra', avatarImage: undefined },
+  { playerIdx: 4, cardIdx: 0, name: 'Doni', avatarImage: undefined },
+  { playerIdx: 5, cardIdx: 3, name: 'Eka', avatarImage: undefined },
+  { playerIdx: 6, cardIdx: 5, name: 'Gani', avatarImage: undefined },
+  { playerIdx: 7, cardIdx: 2, name: 'Hana', avatarImage: undefined },
 ];
 
-cardPicks.forEach(({ playerIdx, cardIdx, name }) => {
+cardPicks.forEach(({ playerIdx, cardIdx, name, avatarImage }) => {
   assertStrictEqual(state.revealIndex, playerIdx, `Player ${playerIdx + 1} turn`);
   state = gameReducer(state, {
     type: 'CLAIM_CARD_AND_NEXT',
     cardIndex: cardIdx,
     playerName: name,
+    avatarImage: avatarImage,
     playerId: `p${playerIdx + 1}`,
     score: 0,
   });
   assertStrictEqual(state.players[cardIdx].name, name, `Card #${cardIdx + 1} claimed by ${name}`);
-  console.log(`  🃏 Player ${playerIdx + 1} (${name}) picked Card #${cardIdx + 1} [Role: ${state.players[cardIdx].role}]`);
+  assertStrictEqual(state.players[cardIdx].avatarImage, avatarImage, `Card #${cardIdx + 1} avatarImage strictly matches`);
+  console.log(`  🃏 Player ${playerIdx + 1} (${name}) picked Card #${cardIdx + 1} [Role: ${state.players[cardIdx].role}, HasPhoto: ${!!avatarImage}]`);
 });
+
+// Verify no profile photo cross-contamination
+const photoCount = state.players.filter(p => !!p.avatarImage).length;
+assertStrictEqual(photoCount, 1, 'Only Fatih has a photo; no photos copied to other players');
+assertStrictEqual(state.players.find(p => p.name === 'Fatih')?.avatarImage, fatihPhoto, 'Fatih retains photo');
+assertStrictEqual(state.players.find(p => p.name === 'Aqil')?.avatarImage, undefined, 'Aqil does NOT copy Fatih photo');
+
+// Verify all players have unique IDs and unique names
+const uniqueIds = new Set(state.players.map(p => p.id));
+assertStrictEqual(uniqueIds.size, 8, 'All 8 players must have strictly unique IDs');
+const uniqueNames = new Set(state.players.map(p => p.name));
+assertStrictEqual(uniqueNames.size, 8, 'All 8 players must have strictly unique names');
 
 assertStrictEqual(state.phase, 'DESCRIPTION', 'All 8 cards claimed -> phase must be DESCRIPTION');
 console.log('✅ PASSED: All 8 players successfully chose distinct cards and claimed them!');

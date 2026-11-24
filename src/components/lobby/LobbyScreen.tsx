@@ -66,7 +66,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     if (targetCount > profiles.length) {
       for (let i = profiles.length + 1; i <= targetCount; i++) {
         updatedProfiles.push({
-          id: `p-${Date.now()}-${i}`,
+          id: `p-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 7)}`,
           name: '',
           avatar: DEFAULT_AVATARS[(i - 1) % DEFAULT_AVATARS.length] || '🦎',
           totalGames: 0,

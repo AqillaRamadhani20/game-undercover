@@ -42,7 +42,7 @@ export const GroupPlayersModal: React.FC<GroupPlayersModalProps> = ({
     const nextAvatar = DEFAULT_AVATARS[profiles.length % DEFAULT_AVATARS.length] || '🦎';
 
     const newProfile: PlayerProfile = {
-      id: `p-${Date.now()}-${profiles.length + 1}`,
+      id: `p-${Date.now()}-${profiles.length + 1}-${Math.random().toString(36).substring(2, 7)}`,
       name,
       avatar: nextAvatar,
       totalGames: 0,

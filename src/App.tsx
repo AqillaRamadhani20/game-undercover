@@ -203,36 +203,26 @@ export function App() {
                 playerId,
                 score,
               });
-              if (playerId) {
-                setProfiles(prev => {
-                  const updated = prev.map(p =>
-                    p.id === playerId
-                      ? {
-                          ...p,
-                          name: playerName,
-                          avatar: avatar || p.avatar,
-                          avatarImage: avatarImage !== undefined ? avatarImage : p.avatarImage,
-                        }
-                      : p
-                  );
-                  savePlayerProfiles(updated);
-                  return updated;
-                });
-              } else {
-                setProfiles(prev => {
-                  const updated = [...prev];
-                  if (updated[state.revealIndex]) {
-                    updated[state.revealIndex] = {
-                      ...updated[state.revealIndex],
-                      name: playerName,
-                      avatar: avatar || updated[state.revealIndex].avatar,
-                      avatarImage: avatarImage !== undefined ? avatarImage : updated[state.revealIndex].avatarImage,
-                    };
-                    savePlayerProfiles(updated);
-                  }
-                  return updated;
-                });
-              }
+              const currentTurnIndex = state.revealIndex;
+              setProfiles(prev => {
+                const updated = [...prev];
+                // Check if this player corresponds to an existing profile by ID, or by current turn index
+                let targetIdx = playerId ? updated.findIndex(p => p.id === playerId) : -1;
+                if (targetIdx === -1 && currentTurnIndex < updated.length) {
+                  targetIdx = currentTurnIndex;
+                }
+                if (targetIdx >= 0) {
+                  updated[targetIdx] = {
+                    ...updated[targetIdx],
+                    id: playerId || updated[targetIdx].id,
+                    name: playerName,
+                    avatar: avatar || updated[targetIdx].avatar,
+                    avatarImage: avatarImage, // Strictly assign avatarImage (clearing photo if undefined)
+                  };
+                }
+                savePlayerProfiles(updated);
+                return updated;
+              });
             }}
           />
         )}
@@ -251,8 +241,33 @@ export function App() {
             onOpenScoreboard={() => setIsScoreboardOpen(true)}
             onRerollWords={() => dispatch({ type: 'REROLL_WORDS' })}
             onUpdatePlayerNameById={handleUpdatePlayerNameById}
-            onDeletePlayer={(playerId) => dispatch({ type: 'REMOVE_PLAYER_IN_GAME', playerId })}
-            onAddPlayer={(name) => dispatch({ type: 'ADD_PLAYER_IN_GAME', name })}
+            onDeletePlayer={(playerId) => {
+              dispatch({ type: 'REMOVE_PLAYER_IN_GAME', playerId });
+              setProfiles(prev => {
+                const updated = prev.filter(p => p.id !== playerId);
+                savePlayerProfiles(updated);
+                return updated;
+              });
+            }}
+            onAddPlayer={(name) => {
+              const newId = `p-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+              dispatch({ type: 'ADD_PLAYER_IN_GAME', name, newId });
+              setProfiles(prev => {
+                const updated = [
+                  ...prev,
+                  {
+                    id: newId,
+                    name: name.trim(),
+                    avatar: '👤',
+                    totalGames: 0,
+                    totalWins: 0,
+                    totalScore: 0,
+                  },
+                ];
+                savePlayerProfiles(updated);
+                return updated;
+              });
+            }}
           />
         )}
 
@@ -302,7 +317,14 @@ export function App() {
             players={state.players}
             activeWordPair={state.activeWordPair}
             roundScoreDeltas={state.roundScoreDeltas}
-            onReplayGame={() => dispatch({ type: 'REPLAY_GAME' })}
+            onReplayGame={() => {
+              dispatch({ type: 'REPLAY_GAME' });
+              setProfiles(prev => {
+                const cleared = prev.map(p => ({ ...p, avatarImage: undefined }));
+                savePlayerProfiles(cleared);
+                return cleared;
+              });
+            }}
             onResetToLobby={() => dispatch({ type: 'RESET_TO_LOBBY' })}
           />
         )}

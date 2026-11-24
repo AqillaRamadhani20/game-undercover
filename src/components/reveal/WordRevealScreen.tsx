@@ -19,6 +19,7 @@ import {
 } from '../common/UndercoverIcons';
 import { soundEffects, triggerHaptic } from '../../utils/audio';
 import { processImageFile } from '../../utils/imageUpload';
+import { DEFAULT_AVATARS } from '../../utils/storage';
 
 interface WordRevealScreenProps {
   player: Player;
@@ -90,6 +91,8 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
   const [playerNameInput, setPlayerNameInput] = useState('');
   const [selectedCardIdx, setSelectedCardIdx] = useState<number | null>(null);
   const [modalAvatarImage, setModalAvatarImage] = useState<string | undefined>(undefined);
+  const [importedPlayerId, setImportedPlayerId] = useState<string | null>(null);
+  const [importedPlayerAvatar, setImportedPlayerAvatar] = useState<string | null>(null);
 
   // Map of card index to claimed player identity
   const [claimedCardsMap, setClaimedCardsMap] = useState<
@@ -113,11 +116,13 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     setSelectedCardIdx(null);
     setPlayerNameInput('');
     setModalAvatarImage(undefined);
+    setImportedPlayerId(null);
+    setImportedPlayerAvatar(null);
   }, [playerIndex]);
 
-  // Existing name in Replay ("Main Lagi") mode
+  // Existing name in Replay ("Main Lagi") mode (from saved profiles for this turn index)
   const existingReplayName = isReplay
-    ? (allPlayers?.[playerIndex]?.name?.trim() || savedProfiles?.[playerIndex]?.name?.trim() || '')
+    ? (savedProfiles?.[playerIndex]?.name?.trim() || '')
     : '';
 
   const cardCount = totalPlayers;
@@ -141,6 +146,8 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     soundEffects.playCardFlip();
     triggerHaptic('light');
     setSelectedCardIdx(idx);
+    setImportedPlayerId(null);
+    setImportedPlayerAvatar(null);
 
     if (isReplay && existingReplayName) {
       // MAIN LAGI: Pemain sudah memiliki nama, langsung buka kartu rahasianya!
@@ -175,10 +182,10 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     triggerHaptic('light');
     if (selectedCardIdx !== null) {
       const chosenName = playerNameInput.trim() || existingReplayName || `Player ${playerIndex + 1}`;
-      const chosenAvatar = allPlayers?.[playerIndex]?.avatar || savedProfiles?.[playerIndex]?.avatar || '👤';
+      const chosenAvatar = importedPlayerAvatar || savedProfiles?.[playerIndex]?.avatar || DEFAULT_AVATARS[playerIndex % DEFAULT_AVATARS.length] || '👤';
       const chosenAvatarImage = modalAvatarImage;
-      const chosenId = allPlayers?.[playerIndex]?.id || savedProfiles?.[playerIndex]?.id;
-      const chosenScore = allPlayers?.[playerIndex]?.score ?? savedProfiles?.[playerIndex]?.totalScore ?? 0;
+      const chosenId = importedPlayerId || savedProfiles?.[playerIndex]?.id || `p-${playerIndex + 1}-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      const chosenScore = savedProfiles?.[playerIndex]?.totalScore ?? 0;
 
       // Update local claimed cards display on table
       setClaimedCardsMap(prev => ({
@@ -210,6 +217,8 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
     setIsWordRevealedInModal(false);
     setModalAvatarImage(undefined);
     setPlayerNameInput('');
+    setImportedPlayerId(null);
+    setImportedPlayerAvatar(null);
   };
 
   const handleTriggerReroll = () => {
@@ -580,7 +589,11 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                   <input
                     type="text"
                     value={playerNameInput}
-                    onChange={(e) => setPlayerNameInput(e.target.value)}
+                    onChange={(e) => {
+                      setPlayerNameInput(e.target.value);
+                      setImportedPlayerId(null);
+                      setImportedPlayerAvatar(null);
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && isNameValid) {
                         handleOpenSecretWord();
@@ -735,6 +748,8 @@ export const WordRevealScreen: React.FC<WordRevealScreenProps> = ({
                         soundEffects.playSelect();
                         setPlayerNameInput(p.name);
                         setModalAvatarImage(p.avatarImage);
+                        setImportedPlayerId(p.id);
+                        setImportedPlayerAvatar(p.avatar);
                         setIsImportModalOpen(false);
                       }}
                       className={`w-full p-3 rounded-2xl flex items-center justify-between text-left transition-all btn-tactile ${isAlreadyClaimed
